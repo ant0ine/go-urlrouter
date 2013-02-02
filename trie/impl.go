@@ -60,6 +60,7 @@ func get_param_token(remaining string) (string, string) {
 func (self *Node) add_route(chars string, route interface{}) {
 
 	if len(chars) == 0 {
+		// TODO error if Route is already set
 		self.Route = route
 		return
 	}
@@ -107,7 +108,7 @@ func (self *Node) find_routes(path string) []interface{} {
 	return routes
 }
 
-func (self *Node) print_json() {
+func (self *Node) PrintJson() {
 	bytes, err := json.MarshalIndent(self, "", "  ")
 	if err != nil {
 		panic(err)
