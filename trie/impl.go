@@ -12,9 +12,9 @@ package trie
 // support compression
 // support *splat
 // API
-// tests
 // benchmarks
 // remove the dependency on json
+// move :PARAM and *SPLAT in to a dedicated map
 
 import (
 	"encoding/json"
@@ -40,17 +40,16 @@ func get_insert_token(chars string) (string, string) {
 	remaining := chars[1:]
 
 	if token[0] == ':' {
-		// this is a route :param
-		for len(remaining) > 0 && remaining[0] != '/' {
-			remaining = remaining[1:]
-		}
-		return ":PARAM", remaining
+		return get_param_token(remaining)
+	} else if token[0] == '*' {
+		return "*SPLAT", ""
 	}
 
 	return token, remaining
 }
 
 func get_param_token(remaining string) (string, string) {
+	// TODO stop at '.' too ?
 	for len(remaining) > 0 && remaining[0] != '/' {
 		remaining = remaining[1:]
 	}
@@ -92,6 +91,11 @@ func (self *Node) find_routes(path string) []interface{} {
 		return routes
 	}
 
+	// *splat branch
+	if self.Children["*SPLAT"] != nil {
+		routes = append(routes, self.Children["*SPLAT"].find_routes("")...)
+	}
+
 	// :param branch
 	if self.Children[":PARAM"] != nil {
 		_, remaining := get_param_token(path)
@@ -116,7 +120,6 @@ func (self *Node) PrintJson() {
 	fmt.Printf("%s", bytes)
 }
 
-// The Trie
 type Trie struct {
 	Root *Node
 }
