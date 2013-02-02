@@ -1,0 +1,56 @@
+PACKAGE
+
+package urlrouter
+    import "github.com/ant0ine/go-urlrouter"
+
+    Efficient URL routing using a Trie data structure.
+
+
+    TODO description
+
+    Example:
+
+	router := urlrouter.Router{
+		Routes: []*urlrouter.Route{
+			&urlrouter.Route{
+				PathExp: "/resources/:id",
+				Dest:    "one_resource",
+			},
+			&urlrouter.Route{
+				PathExp: "/resources",
+				Dest:    "all_resources",
+			},
+		},
+	}
+	err := router.Prepare()
+	if err != nil {
+		panic(err)
+	}
+	input := "http://example.org/resources/123.json"
+	route := router.FindRoute(input)
+	fmt.Print(route.Dest)
+
+TYPES
+
+type Route struct {
+    PathExp string
+    Dest    interface{}
+}
+    TODO explain why Dest as an interface{} is nice
+
+type Router struct {
+    Routes []*Route
+    // contains filtered or unexported fields
+}
+
+func (self *Router) FindRoute(url_str string) *Route
+
+func (self *Router) Prepare() error
+
+
+SUBDIRECTORIES
+
+	example
+	temp
+	trie
+
