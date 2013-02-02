@@ -1,7 +1,6 @@
 PACKAGE
 
 package urlrouter
-    import "github.com/ant0ine/go-urlrouter"
 
     Efficient URL routing using a Trie data structure.
 
@@ -27,7 +26,10 @@ package urlrouter
 		panic(err)
 	}
 	input := "http://example.org/resources/123.json"
-	route := router.FindRoute(input)
+	route, err := router.FindRouteFromString(input)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Print(route.Dest)
 
 TYPES
@@ -43,7 +45,9 @@ type Router struct {
     // contains filtered or unexported fields
 }
 
-func (self *Router) FindRoute(url_str string) *Route
+func (self *Router) FindRouteFromString(url_str string) (*Route, error)
+
+func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route
 
 func (self *Router) Prepare() error
 
@@ -51,6 +55,5 @@ func (self *Router) Prepare() error
 SUBDIRECTORIES
 
 	example
-	temp
 	trie
 

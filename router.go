@@ -22,7 +22,10 @@
 //	}
 //
 //	input := "http://example.org/resources/123.json"
-//	route := router.FindRoute(input)
+//	route, err := router.FindRouteFromString(input)
+//	if err != nil {
+//		panic(err)
+//	}
 //	fmt.Print(route.Dest)
 //
 package urlrouter
@@ -59,22 +62,19 @@ func (self *Router) Prepare() error {
 		self.trie.AddRoute(route.PathExp, route)
 	}
 
+	// TODO route.PathExp should be unique ?
 	// TODO validation of the PathExp ? start with a /
+	// TODO url encoding
 	// TODO compress the Trie (when supported)
 
 	return nil
 }
 
-func (self *Router) FindRoute(url_str string) *Route {
-	// TODO provide another method that takes a url object ?
-
-	// parse the url
-	url_obj, err := url.Parse(url_str)
-	if err != nil {
-		panic(err) // XXX
-	}
+//
+func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route {
 
 	// lookup the routes in the Trie
+	// TODO verify url encoding
 	routes := self.trie.FindRoutes(url_obj.Path)
 
 	// only return the first Route that matches
@@ -88,4 +88,16 @@ func (self *Router) FindRoute(url_str string) *Route {
 	}
 
 	return self.Routes[min_index]
+}
+
+//
+func (self *Router) FindRouteFromString(url_str string) (*Route, error) {
+
+	// parse the url
+	url_obj, err := url.Parse(url_str)
+	if err != nil {
+		return nil, err
+	}
+
+	return self.FindRouteFromURL(url_obj), nil
 }
