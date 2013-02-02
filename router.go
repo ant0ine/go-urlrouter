@@ -35,20 +35,21 @@ import (
 	"net/url"
 )
 
-// TODO explain why Dest as an interface{} is nice
 type Route struct {
+        // a string like "/resource/:id.json"
 	PathExp string
+        // can be anything useful to point to the code to run for this route.
 	Dest    interface{}
 }
 
-//
 type Router struct {
 	Routes []*Route
 	index  map[*Route]int
 	trie   *trie.Trie
 }
 
-//
+// This validates the Routes and prepares the Trie data structure.
+// It must be called once the Routes are defined and before trying to find Routes.
 func (self *Router) Prepare() error {
 
 	self.trie = trie.New()
@@ -70,7 +71,7 @@ func (self *Router) Prepare() error {
 	return nil
 }
 
-//
+// Return the first matching Route for the given URL
 func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route {
 
 	// lookup the routes in the Trie
@@ -90,7 +91,7 @@ func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route {
 	return self.Routes[min_index]
 }
 
-//
+// Parse the url string and call FindRouteFromURL
 func (self *Router) FindRouteFromString(url_str string) (*Route, error) {
 
 	// parse the url

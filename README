@@ -35,10 +35,11 @@ package urlrouter
 TYPES
 
 type Route struct {
+    // a string like "/resource/:id.json"
     PathExp string
-    Dest    interface{}
+    // can be anything useful to point to the code to run for this route.
+    Dest interface{}
 }
-    TODO explain why Dest as an interface{} is nice
 
 type Router struct {
     Routes []*Route
@@ -46,10 +47,14 @@ type Router struct {
 }
 
 func (self *Router) FindRouteFromString(url_str string) (*Route, error)
+    Parse the url string and call FindRouteFromURL
 
 func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route
+    Return the first matching Route for the given URL
 
 func (self *Router) Prepare() error
+    This validates the Routes and prepares the Trie data structure. It must
+    be called once the Routes are defined and before trying to find Routes.
 
 
 SUBDIRECTORIES
