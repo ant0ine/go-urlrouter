@@ -43,6 +43,18 @@ func TestSplatInsert(t *testing.T) {
 	}
 }
 
+func TestDupeInsert(t *testing.T) {
+	trie := New()
+	trie.AddRoute("/", "1")
+	err := trie.AddRoute("/", "2")
+	if err == nil {
+		t.Error()
+	}
+	if trie.Root.Children["/"].Route != "1" {
+		t.Error()
+	}
+}
+
 func TestSimpleExample(t *testing.T) {
 
 	trie := New()

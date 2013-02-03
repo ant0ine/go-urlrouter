@@ -35,6 +35,9 @@ import (
 	"net/url"
 )
 
+// TODO
+// benchmarks
+
 type Route struct {
         // a string like "/resource/:id.json"
 	PathExp string

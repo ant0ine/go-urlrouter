@@ -10,13 +10,11 @@ package trie
 
 // TODO
 // support compression
-// API
-// benchmarks
 // remove the dependency on json
-// move :PARAM and *SPLAT in to a dedicated map
 
 import (
 	"encoding/json"
+        "errors"
 	"fmt"
 )
 
@@ -37,12 +35,15 @@ func get_param_remaining(remaining string) string {
 	return remaining
 }
 
-func (self *Node) add_route(path string, route interface{}) {
+func (self *Node) add_route(path string, route interface{}) error {
 
 	if len(path) == 0 {
-		// TODO error if Route is already set
+                // end of the path, set the Route
+                if self.Route != nil {
+                        return errors.New("Node.Route already set, duplicated path")
+                }
 		self.Route = route
-		return
+		return nil
 	}
 
 	token := path[0:1]
@@ -73,7 +74,7 @@ func (self *Node) add_route(path string, route interface{}) {
 		next_node = self.Children[token]
 	}
 
-	next_node.add_route(remaining, route)
+	return next_node.add_route(remaining, route)
 }
 
 func (self *Node) find_routes(path string) []interface{} {
@@ -139,8 +140,8 @@ func New() *Trie {
 }
 
 // Insert the route in the Trie following or creating the Nodes corresponding to the path.
-func (self *Trie) AddRoute(path string, route interface{}) {
-	self.Root.add_route(path, route)
+func (self *Trie) AddRoute(path string, route interface{}) error {
+	return self.Root.add_route(path, route)
 }
 
 // Given a path, return all the matchin routes.
