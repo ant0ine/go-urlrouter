@@ -9,6 +9,7 @@
 package trie
 
 // TODO support compression
+// TODO support param map for matched routes
 
 import (
 	"errors"

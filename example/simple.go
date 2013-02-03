@@ -25,8 +25,8 @@ func main() {
 		panic(err)
 	}
 
-	input := "http://example.org/resources/123.json"
-	route, err := router.FindRouteFromString(input)
+	input := "http://example.org/resources/123"
+	route, err := router.FindRoute(input)
 	if err != nil {
 		panic(err)
 	}

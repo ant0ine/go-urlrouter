@@ -21,8 +21,8 @@
 //		panic(err)
 //	}
 //
-//	input := "http://example.org/resources/123.json"
-//	route, err := router.FindRouteFromString(input)
+//	input := "http://example.org/resources/123"
+//	route, err := router.FindRoute(input)
 //	if err != nil {
 //		panic(err)
 //	}
@@ -31,6 +31,7 @@
 package urlrouter
 
 import (
+	"errors"
 	"github.com/ant0ine/go-urlrouter/trie"
 	"net/url"
 )
@@ -39,10 +40,10 @@ import (
 // benchmarks
 
 type Route struct {
-        // a string like "/resource/:id.json"
+	// a string like "/resource/:id.json"
 	PathExp string
-        // can be anything useful to point to the code to run for this route.
-	Dest    interface{}
+	// can be anything useful to point to the code to run for this route.
+	Dest interface{}
 }
 
 type Router struct {
@@ -56,17 +57,24 @@ type Router struct {
 func (self *Router) Prepare() error {
 
 	self.trie = trie.New()
-
 	self.index = map[*Route]int{}
+	unique := map[string]bool{}
 
 	for i, route := range self.Routes {
+		// unique
+		if unique[route.PathExp] == true {
+			return errors.New("duplicated PathExp")
+		}
+		unique[route.PathExp] = true
 		// index
 		self.index[route] = i
 		// insert in the Trie
-		self.trie.AddRoute(route.PathExp, route)
+		err := self.trie.AddRoute(route.PathExp, route)
+		if err != nil {
+			return err
+		}
 	}
 
-	// TODO route.PathExp should be unique ?
 	// TODO validation of the PathExp ? start with a /
 	// TODO url encoding
 	// TODO compress the Trie (when supported)
@@ -74,7 +82,7 @@ func (self *Router) Prepare() error {
 	return nil
 }
 
-// Return the first matching Route for the given URL
+// Return the first matching Route for the given URL object.
 func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route {
 
 	// lookup the routes in the Trie
@@ -91,11 +99,16 @@ func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route {
 		}
 	}
 
+	if min_index == -1 {
+		// no route found
+		return nil
+	}
+
 	return self.Routes[min_index]
 }
 
-// Parse the url string and call FindRouteFromURL
-func (self *Router) FindRouteFromString(url_str string) (*Route, error) {
+// Parse the url string (complete or just the path) and call FindRouteFromURL
+func (self *Router) FindRoute(url_str string) (*Route, error) {
 
 	// parse the url
 	url_obj, err := url.Parse(url_str)
