@@ -77,7 +77,7 @@ func (self *Node) find_routes(path string) []interface{} {
 
 	routes := []interface{}{}
 
-	if self.Route != nil {
+	if self.Route != nil && path == "" {
 		routes = append(routes, self.Route)
 	}
 
