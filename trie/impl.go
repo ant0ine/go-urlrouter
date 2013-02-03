@@ -8,14 +8,10 @@
 //  TBD
 package trie
 
-// TODO
-// support compression
-// remove the dependency on json
+// TODO support compression
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 // A Node of the Trie
@@ -64,6 +60,7 @@ func (self *Node) add_route(path string, route interface{}) error {
 		}
 		next_node = self.SplatChild
 	} else {
+		// general case
 		if self.Children == nil {
 			self.Children = map[string]*Node{}
 		}
@@ -117,14 +114,6 @@ func (self *Node) find_routes(path string) []interface{} {
 	}
 
 	return routes
-}
-
-func (self *Node) PrintJson() {
-	bytes, err := json.MarshalIndent(self, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%s", bytes)
 }
 
 type Trie struct {
