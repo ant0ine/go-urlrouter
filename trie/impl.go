@@ -14,7 +14,7 @@ package trie
 
 import (
 	"encoding/json"
-        "errors"
+	"errors"
 	"fmt"
 )
 
@@ -28,8 +28,7 @@ type Node struct {
 }
 
 func get_param_remaining(remaining string) string {
-	// TODO stop at '.' too ?
-	for len(remaining) > 0 && remaining[0] != '/' {
+	for len(remaining) > 0 && remaining[0] != '/' && remaining[0] != '.' {
 		remaining = remaining[1:]
 	}
 	return remaining
@@ -38,10 +37,10 @@ func get_param_remaining(remaining string) string {
 func (self *Node) add_route(path string, route interface{}) error {
 
 	if len(path) == 0 {
-                // end of the path, set the Route
-                if self.Route != nil {
-                        return errors.New("Node.Route already set, duplicated path")
-                }
+		// end of the path, set the Route
+		if self.Route != nil {
+			return errors.New("Node.Route already set, duplicated path")
+		}
 		self.Route = route
 		return nil
 	}

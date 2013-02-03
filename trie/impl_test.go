@@ -29,8 +29,14 @@ func TestPathInsert(t *testing.T) {
 
 func TestParamInsert(t *testing.T) {
 	trie := New()
+
 	trie.AddRoute("/:id/", "")
 	if trie.Root.Children["/"].ParamChild.Children["/"] == nil {
+		t.Error()
+	}
+
+	trie.AddRoute("/:id/:property.json", "")
+	if trie.Root.Children["/"].ParamChild.Children["/"].ParamChild.Children["."] == nil {
 		t.Error()
 	}
 }
