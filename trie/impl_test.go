@@ -30,7 +30,7 @@ func TestPathInsert(t *testing.T) {
 func TestParamInsert(t *testing.T) {
 	trie := New()
 	trie.AddRoute("/:id/", "")
-	if trie.Root.Children["/"].Children[":PARAM"].Children["/"] == nil {
+	if trie.Root.Children["/"].ParamChild.Children["/"] == nil {
 		t.Error()
 	}
 }
@@ -38,7 +38,7 @@ func TestParamInsert(t *testing.T) {
 func TestSplatInsert(t *testing.T) {
 	trie := New()
 	trie.AddRoute("/*splat", "")
-	if trie.Root.Children["/"].Children["*SPLAT"] == nil {
+	if trie.Root.Children["/"].SplatChild == nil {
 		t.Error()
 	}
 }

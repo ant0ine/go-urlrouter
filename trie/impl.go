@@ -10,7 +10,6 @@ package trie
 
 // TODO
 // support compression
-// support *splat
 // API
 // benchmarks
 // remove the dependency on json
@@ -23,59 +22,57 @@ import (
 
 // A Node of the Trie
 type Node struct {
-	Route    interface{}
-	Children map[string]*Node
+	Route      interface{}
+	Children   map[string]*Node
+	ParamChild *Node
+	SplatChild *Node
 	//children_key_length int
 }
 
-// TODO rename these token methods
-func get_find_token(full string, length int) (string, string) {
-	return full[0:length], full[length:]
-}
-
-func get_insert_token(chars string) (string, string) {
-
-	// TODO test oversize
-	token := chars[0:1]
-	remaining := chars[1:]
-
-	if token[0] == ':' {
-		return get_param_token(remaining)
-	} else if token[0] == '*' {
-		return "*SPLAT", ""
-	}
-
-	return token, remaining
-}
-
-func get_param_token(remaining string) (string, string) {
+func get_param_remaining(remaining string) string {
 	// TODO stop at '.' too ?
 	for len(remaining) > 0 && remaining[0] != '/' {
 		remaining = remaining[1:]
 	}
-	return ":PARAM", remaining
+	return remaining
 }
 
-func (self *Node) add_route(chars string, route interface{}) {
+func (self *Node) add_route(path string, route interface{}) {
 
-	if len(chars) == 0 {
+	if len(path) == 0 {
 		// TODO error if Route is already set
 		self.Route = route
 		return
 	}
 
-	if self.Children == nil {
-		self.Children = map[string]*Node{}
+	token := path[0:1]
+	remaining := path[1:]
+	var next_node *Node
+
+	if token[0] == ':' {
+		// :param case
+		remaining = get_param_remaining(remaining)
+		if self.ParamChild == nil {
+			self.ParamChild = &Node{}
+		}
+		next_node = self.ParamChild
+	} else if token[0] == '*' {
+		// *splat case
+		remaining = ""
+		if self.SplatChild == nil {
+			self.SplatChild = &Node{}
+		}
+		next_node = self.SplatChild
+	} else {
+		if self.Children == nil {
+			self.Children = map[string]*Node{}
+		}
+		if self.Children[token] == nil {
+			self.Children[token] = &Node{}
+		}
+		next_node = self.Children[token]
 	}
 
-	// ask for 1 char token during the insert
-	token, remaining := get_insert_token(chars)
-
-	next_node := self.Children[token]
-	if next_node == nil {
-		next_node = &Node{}
-		self.Children[token] = next_node
-	}
 	next_node.add_route(remaining, route)
 }
 
@@ -87,26 +84,36 @@ func (self *Node) find_routes(path string) []interface{} {
 		routes = append(routes, self.Route)
 	}
 
-	if len(path) < 1 {
+	if len(path) == 0 {
 		return routes
 	}
 
 	// *splat branch
-	if self.Children["*SPLAT"] != nil {
-		routes = append(routes, self.Children["*SPLAT"].find_routes("")...)
+	if self.SplatChild != nil {
+		routes = append(
+			routes,
+			self.SplatChild.find_routes("")...,
+		)
 	}
 
 	// :param branch
-	if self.Children[":PARAM"] != nil {
-		_, remaining := get_param_token(path)
-		routes = append(routes, self.Children[":PARAM"].find_routes(remaining)...)
+	if self.ParamChild != nil {
+		remaining := get_param_remaining(path)
+		routes = append(
+			routes,
+			self.ParamChild.find_routes(remaining)...,
+		)
 	}
 
 	// main branch
-	token, remaining := get_find_token(path, 1)
-	next := self.Children[token]
-	if next != nil {
-		routes = append(routes, next.find_routes(remaining)...)
+	length := 1
+	token := path[0:length]
+	remaining := path[length:]
+	if self.Children[token] != nil {
+		routes = append(
+			routes,
+			self.Children[token].find_routes(remaining)...,
+		)
 	}
 
 	return routes
