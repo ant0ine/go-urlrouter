@@ -1,6 +1,10 @@
 // Efficient URL routing using a Trie data structure.
 //
-// TODO description
+// This Package implements a URL Router, but instead of using the usual
+// "evaluate all the routes and return the first rexexp that matches" strategy,
+// it uses a Trie data structure to perform the routing. This is more efficient,
+// and scales better for a large number of routes.
+// It supports the usual :param and *splat route syntax.
 //
 // Example:
 //	router := urlrouter.Router{
