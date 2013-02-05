@@ -47,9 +47,12 @@ import (
 // benchmarks
 
 type Route struct {
-	// a string like "/resource/:id.json"
+	// A string defining the route, like "/resource/:id.json".
+        // Placeholders supported are:
+        // :param that matches any char to the first '/' or '.'
+        // *splat that matches everything to the end of the string
 	PathExp string
-	// can be anything useful to point to the code to run for this route.
+	// Can be anything useful to point to the code to run for this route.
 	Dest interface{}
 }
 
