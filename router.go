@@ -8,12 +8,12 @@
 //
 // Example:
 //	router := urlrouter.Router{
-//		Routes: []*urlrouter.Route{
-//			&urlrouter.Route{
+//		Routes: []urlrouter.Route{
+//			urlrouter.Route{
 //				PathExp: "/resources/:id",
 //				Dest:    "one_resource",
 //			},
-//			&urlrouter.Route{
+//			urlrouter.Route{
 //				PathExp: "/resources",
 //				Dest:    "all_resources",
 //			},
@@ -54,7 +54,7 @@ type Route struct {
 }
 
 type Router struct {
-	Routes []*Route
+	Routes []Route
 	index  map[*Route]int
 	trie   *trie.Trie
 }
@@ -67,7 +67,9 @@ func (self *Router) Start() error {
 	self.index = map[*Route]int{}
 	unique := map[string]bool{}
 
-	for i, route := range self.Routes {
+	for i, _ := range self.Routes {
+                // pointer to the Route
+                route := &self.Routes[i]
 		// unique
 		if unique[route.PathExp] == true {
 			return errors.New("duplicated PathExp")
@@ -111,7 +113,7 @@ func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route {
 		return nil
 	}
 
-	return self.Routes[min_index]
+	return &self.Routes[min_index]
 }
 
 // Parse the url string (complete or just the path) and call FindRouteFromURL

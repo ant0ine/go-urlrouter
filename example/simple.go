@@ -8,12 +8,12 @@ import (
 func main() {
 
 	router := urlrouter.Router{
-		Routes: []*urlrouter.Route{
-			&urlrouter.Route{
+		Routes: []urlrouter.Route{
+			urlrouter.Route{
 				PathExp: "/resources/:id",
 				Dest:    "one_resource",
 			},
-			&urlrouter.Route{
+			urlrouter.Route{
 				PathExp: "/resources",
 				Dest:    "all_resources",
 			},

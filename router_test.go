@@ -8,8 +8,8 @@ import (
 func TestFindRouteAPI(t *testing.T) {
 
 	router := Router{
-		Routes: []*Route{
-			&Route{
+		Routes: []Route{
+			Route{
 				PathExp: "/",
 				Dest:    "root",
 			},
@@ -55,7 +55,7 @@ func TestFindRouteAPI(t *testing.T) {
 func TestNoRoute(t *testing.T) {
 
 	router := Router{
-		Routes: []*Route{},
+		Routes: []Route{},
 	}
 
 	err := router.Start()
@@ -77,12 +77,12 @@ func TestNoRoute(t *testing.T) {
 func TestDuplicatedRoute(t *testing.T) {
 
 	router := Router{
-		Routes: []*Route{
-			&Route{
+		Routes: []Route{
+			Route{
 				PathExp: "/",
 				Dest:    "root",
 			},
-			&Route{
+			Route{
 				PathExp: "/",
 				Dest:    "the_same",
 			},
@@ -98,12 +98,12 @@ func TestDuplicatedRoute(t *testing.T) {
 func TestRouteOrder(t *testing.T) {
 
 	router := Router{
-		Routes: []*Route{
-			&Route{
+		Routes: []Route{
+			Route{
 				PathExp: "/r/:id",
 				Dest:    "first",
 			},
-			&Route{
+			Route{
 				PathExp: "/r/*rest",
 				Dest:    "second",
 			},
@@ -122,19 +122,19 @@ func TestRouteOrder(t *testing.T) {
 	}
 
 	if route.Dest != "first" {
-		t.Error("both match, expected the first defined")
+		t.Errorf("both match, expected the first defined, got %s", route.Dest)
 	}
 }
 
 func TestSimpleExample(t *testing.T) {
 
 	router := Router{
-		Routes: []*Route{
-			&Route{
+		Routes: []Route{
+			Route{
 				PathExp: "/resources/:id",
 				Dest:    "one_resource",
 			},
-			&Route{
+			Route{
 				PathExp: "/resources",
 				Dest:    "all_resources",
 			},
