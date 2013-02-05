@@ -68,8 +68,8 @@ func (self *Router) Start() error {
 	unique := map[string]bool{}
 
 	for i, _ := range self.Routes {
-                // pointer to the Route
-                route := &self.Routes[i]
+		// pointer to the Route
+		route := &self.Routes[i]
 		// unique
 		if unique[route.PathExp] == true {
 			return errors.New("duplicated PathExp")

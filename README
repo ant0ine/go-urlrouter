@@ -13,18 +13,18 @@ package urlrouter
     Example:
 
 	router := urlrouter.Router{
-		Routes: []*urlrouter.Route{
-			&urlrouter.Route{
+		Routes: []urlrouter.Route{
+			urlrouter.Route{
 				PathExp: "/resources/:id",
 				Dest:    "one_resource",
 			},
-			&urlrouter.Route{
+			urlrouter.Route{
 				PathExp: "/resources",
 				Dest:    "all_resources",
 			},
 		},
 	}
-	err := router.Prepare()
+	err := router.Start()
 	if err != nil {
 		panic(err)
 	}
@@ -45,7 +45,7 @@ type Route struct {
 }
 
 type Router struct {
-    Routes []*Route
+    Routes []Route
     // contains filtered or unexported fields
 }
 
@@ -56,7 +56,7 @@ func (self *Router) FindRoute(url_str string) (*Route, error)
 func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route
     Return the first matching Route for the given URL object.
 
-func (self *Router) Prepare() error
+func (self *Router) Start() error
     This validates the Routes and prepares the Trie data structure. It must
     be called once the Routes are defined and before trying to find Routes.
 
