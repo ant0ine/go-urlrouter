@@ -16,7 +16,7 @@ func TestFindRouteAPI(t *testing.T) {
 		},
 	}
 
-	err := router.Prepare()
+	err := router.Start()
 	if err != nil {
 		t.Fatal()
 	}
@@ -58,7 +58,7 @@ func TestNoRoute(t *testing.T) {
 		Routes: []*Route{},
 	}
 
-	err := router.Prepare()
+	err := router.Start()
 	if err != nil {
 		t.Fatal()
 	}
@@ -89,7 +89,7 @@ func TestDuplicatedRoute(t *testing.T) {
 		},
 	}
 
-	err := router.Prepare()
+	err := router.Start()
 	if err == nil {
 		t.Error("expected the duplicated route error")
 	}
@@ -110,7 +110,7 @@ func TestRouteOrder(t *testing.T) {
 		},
 	}
 
-	err := router.Prepare()
+	err := router.Start()
 	if err != nil {
 		t.Fatal()
 	}
@@ -141,7 +141,7 @@ func TestSimpleExample(t *testing.T) {
 		},
 	}
 
-	err := router.Prepare()
+	err := router.Start()
 	if err != nil {
 		t.Fatal()
 	}

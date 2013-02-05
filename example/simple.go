@@ -20,7 +20,7 @@ func main() {
 		},
 	}
 
-	err := router.Prepare()
+	err := router.Start()
 	if err != nil {
 		panic(err)
 	}

@@ -20,7 +20,7 @@
 //		},
 //	}
 //
-//	err := router.Prepare()
+//	err := router.Start()
 //	if err != nil {
 //		panic(err)
 //	}
@@ -61,7 +61,7 @@ type Router struct {
 
 // This validates the Routes and prepares the Trie data structure.
 // It must be called once the Routes are defined and before trying to find Routes.
-func (self *Router) Prepare() error {
+func (self *Router) Start() error {
 
 	self.trie = trie.New()
 	self.index = map[*Route]int{}
