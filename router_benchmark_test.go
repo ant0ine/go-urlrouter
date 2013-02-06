@@ -20,7 +20,7 @@ func BenchmarkNoCompression(b *testing.B) {
 				Dest:    "all_resources",
 			},
 		},
-		DisableTrieCompression: true,
+		disable_trie_compression: true,
 	}
 	router.Start()
 	url_obj, _ := url.Parse("http://example.org/resources/123")

@@ -55,10 +55,10 @@ type Route struct {
 }
 
 type Router struct {
-	Routes                 []Route
-	DisableTrieCompression bool
-	index                  map[*Route]int
-	trie                   *trie.Trie
+	Routes                   []Route
+	disable_trie_compression bool
+	index                    map[*Route]int
+	trie                     *trie.Trie
 }
 
 // This validates the Routes and prepares the Trie data structure.
@@ -86,7 +86,7 @@ func (self *Router) Start() error {
 		}
 	}
 
-	if self.DisableTrieCompression == false {
+	if self.disable_trie_compression == false {
 		self.trie.Compress()
 	}
 
