@@ -25,10 +25,11 @@ type Node struct {
 }
 
 func get_param_remaining(remaining string) string {
-	for len(remaining) > 0 && remaining[0] != '/' && remaining[0] != '.' {
-		remaining = remaining[1:]
+	i := 0
+	for len(remaining) > i && remaining[i] != '/' && remaining[i] != '.' {
+		i++
 	}
-	return remaining
+	return remaining[i:]
 }
 
 func (self *Node) add_route(path string, route interface{}) error {
