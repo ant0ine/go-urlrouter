@@ -27,6 +27,31 @@ func TestPathInsert(t *testing.T) {
 	}
 }
 
+func TestTrieCompression(t *testing.T) {
+
+	trie := New()
+	trie.AddRoute("/abc", "3")
+	trie.AddRoute("/adc", "3")
+
+	// before compression
+	if trie.Root.Children["/"].Children["a"].Children["b"].Children["c"] == nil {
+		t.Error()
+	}
+	if trie.Root.Children["/"].Children["a"].Children["d"].Children["c"] == nil {
+		t.Error()
+	}
+
+	trie.Compress()
+
+	// after compression
+	if trie.Root.Children["/abc"] == nil {
+		t.Errorf("%+v", trie.Root)
+	}
+	if trie.Root.Children["/adc"] == nil {
+		t.Errorf("%+v", trie.Root)
+	}
+
+}
 func TestParamInsert(t *testing.T) {
 	trie := New()
 
@@ -79,6 +104,8 @@ func TestFindRoute(t *testing.T) {
 	trie.AddRoute("/r/:id/property", "property")
 	trie.AddRoute("/r/:id/property*", "property_format")
 
+	trie.Compress()
+
 	routes := trie.FindRoutes("/")
 	if len(routes) != 1 {
 		t.Errorf("expected one route, got %d", len(routes))
@@ -127,6 +154,8 @@ func TestFindRouteMultipleMatches(t *testing.T) {
 	trie.AddRoute("/s/*rest", "special_all")
 	trie.AddRoute("/s/:param", "special_generic")
 	trie.AddRoute("/", "root")
+
+	trie.Compress()
 
 	routes := trie.FindRoutes("/r/1")
 	if len(routes) != 2 {

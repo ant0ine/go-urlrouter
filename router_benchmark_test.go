@@ -5,7 +5,36 @@ import (
 	"testing"
 )
 
-func BenchmarkSimple(b *testing.B) {
+func BenchmarkNoCompression(b *testing.B) {
+
+	b.StopTimer()
+
+	router := Router{
+		Routes: []Route{
+			Route{
+				PathExp: "/resources/:id",
+				Dest:    "one_resource",
+			},
+			Route{
+				PathExp: "/resources",
+				Dest:    "all_resources",
+			},
+		},
+		DisableTrieCompression: true,
+	}
+	router.Start()
+	url_obj, _ := url.Parse("http://example.org/resources/123")
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		router.FindRouteFromURL(url_obj)
+	}
+}
+
+func BenchmarkCompression(b *testing.B) {
+
+	b.StopTimer()
 
 	router := Router{
 		Routes: []Route{
@@ -19,11 +48,12 @@ func BenchmarkSimple(b *testing.B) {
 			},
 		},
 	}
-
 	router.Start()
-
 	url_obj, _ := url.Parse("http://example.org/resources/123")
-        for i := 0; i < b.N; i++ {
-	        router.FindRouteFromURL(url_obj)
-        }
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		router.FindRouteFromURL(url_obj)
+	}
 }

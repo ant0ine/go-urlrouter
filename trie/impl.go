@@ -8,7 +8,6 @@
 //  TBD
 package trie
 
-// TODO support compression
 // TODO support param map for matched routes
 
 import (
@@ -17,11 +16,11 @@ import (
 
 // A Node of the Trie
 type Node struct {
-	Route      interface{}
-	Children   map[string]*Node
-	ParamChild *Node
-	SplatChild *Node
-	//children_key_length int
+	Route          interface{}
+	Children       map[string]*Node
+	ChildrenKeyLen int
+	ParamChild     *Node
+	SplatChild     *Node
 }
 
 func get_param_remaining(remaining string) string {
@@ -65,6 +64,7 @@ func (self *Node) add_route(path string, route interface{}) error {
 		// general case
 		if self.Children == nil {
 			self.Children = map[string]*Node{}
+			self.ChildrenKeyLen = 1
 		}
 		if self.Children[token] == nil {
 			self.Children[token] = &Node{}
@@ -105,7 +105,10 @@ func (self *Node) find_routes(path string) []interface{} {
 	}
 
 	// main branch
-	length := 1
+	length := self.ChildrenKeyLen
+	if len(path) < length {
+		return routes
+	}
 	token := path[0:length]
 	remaining := path[length:]
 	if self.Children[token] != nil {
@@ -116,6 +119,46 @@ func (self *Node) find_routes(path string) []interface{} {
 	}
 
 	return routes
+}
+
+func (self *Node) compress() {
+	// *splat branch
+	if self.SplatChild != nil {
+		self.SplatChild.compress()
+	}
+	// :param branch
+	if self.ParamChild != nil {
+		self.ParamChild.compress()
+	}
+	// main branch
+	if len(self.Children) == 0 {
+		return
+	}
+	// compressable ?
+	can_compress := true
+	for _, node := range self.Children {
+		if node.Route != nil || node.SplatChild != nil || node.ParamChild != nil {
+			can_compress = false
+		}
+	}
+	// compress
+	if can_compress {
+		merged := map[string]*Node{}
+		for key, node := range self.Children {
+			for gd_key, gd_node := range node.Children {
+				merged_key := key + gd_key
+				merged[merged_key] = gd_node
+			}
+		}
+		self.Children = merged
+		self.ChildrenKeyLen++
+		self.compress()
+		// continue
+	} else {
+		for _, node := range self.Children {
+			node.compress()
+		}
+	}
 }
 
 type Trie struct {
@@ -137,4 +180,9 @@ func (self *Trie) AddRoute(path string, route interface{}) error {
 // Given a path, return all the matchin routes.
 func (self *Trie) FindRoutes(path string) []interface{} {
 	return self.Root.find_routes(path)
+}
+
+// Reduce the size of the tree, must be done after the last AddRoute.
+func (self *Trie) Compress() {
+	self.Root.compress()
 }

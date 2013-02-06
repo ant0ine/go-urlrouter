@@ -42,24 +42,23 @@ import (
 
 // TODO
 // support for http method routing ?
-// support for #param placeholder
-// document :param and *splat
-// benchmarks
+// support for #param placeholder ?
 
 type Route struct {
 	// A string defining the route, like "/resource/:id.json".
-        // Placeholders supported are:
-        // :param that matches any char to the first '/' or '.'
-        // *splat that matches everything to the end of the string
+	// Placeholders supported are:
+	// :param that matches any char to the first '/' or '.'
+	// *splat that matches everything to the end of the string
 	PathExp string
 	// Can be anything useful to point to the code to run for this route.
 	Dest interface{}
 }
 
 type Router struct {
-	Routes []Route
-	index  map[*Route]int
-	trie   *trie.Trie
+	Routes                 []Route
+	DisableTrieCompression bool
+	index                  map[*Route]int
+	trie                   *trie.Trie
 }
 
 // This validates the Routes and prepares the Trie data structure.
@@ -87,9 +86,12 @@ func (self *Router) Start() error {
 		}
 	}
 
+	if self.DisableTrieCompression == false {
+		self.trie.Compress()
+	}
+
 	// TODO validation of the PathExp ? start with a /
 	// TODO url encoding
-	// TODO compress the Trie (when supported)
 
 	return nil
 }
