@@ -30,8 +30,8 @@
 //	if err != nil {
 //		panic(err)
 //	}
-//	fmt.Print(route.Dest)
-//	fmt.Print(params["id"])
+//	fmt.Print(route.Dest)  // one_resource
+//	fmt.Print(params["id"])  // 123
 //
 package urlrouter
 
@@ -128,7 +128,7 @@ func (self *Router) FindRouteFromURL(url_obj *url.URL) (*Route, map[string]strin
 	return match.Route.(*Route), match.Params
 }
 
-// Parse the url string (complete or just the path) and call FindRouteFromURL
+// Parse the url string (complete or just the path) and return the first matching Route and the corresponding parameters.
 func (self *Router) FindRoute(url_str string) (*Route, map[string]string, error) {
 
 	// parse the url

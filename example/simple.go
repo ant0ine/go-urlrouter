@@ -30,6 +30,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print(route.Dest)
-	fmt.Print(params["id"])
+	fmt.Print(route.Dest)  // one_resource
+	fmt.Print(params["id"])  // 123
 }
