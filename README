@@ -29,11 +29,12 @@ package urlrouter
 		panic(err)
 	}
 	input := "http://example.org/resources/123"
-	route, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Print(route.Dest)
+	fmt.Print(params["id"])
 
 TYPES
 
@@ -52,12 +53,13 @@ type Router struct {
     // contains filtered or unexported fields
 }
 
-func (self *Router) FindRoute(url_str string) (*Route, error)
+func (self *Router) FindRoute(url_str string) (*Route, map[string]string, error)
     Parse the url string (complete or just the path) and call
     FindRouteFromURL
 
-func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route
-    Return the first matching Route for the given URL object.
+func (self *Router) FindRouteFromURL(url_obj *url.URL) (*Route, map[string]string)
+    Return the first matching Route and the corresponding parameters for a
+    given URL object.
 
 func (self *Router) Start() error
     This validates the Routes and prepares the Trie data structure. It must

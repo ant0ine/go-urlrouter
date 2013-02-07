@@ -23,21 +23,27 @@ func TestFindRouteAPI(t *testing.T) {
 
 	// full url string
 	input := "http://example.org/"
-	route, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input)
 	if err != nil {
 		t.Fatal()
 	}
 	if route.Dest != "root" {
 		t.Error()
 	}
+	if len(params) != 0 {
+		t.Error()
+	}
 
 	// part of the url string
 	input = "/"
-	route, err = router.FindRoute(input)
+	route, params, err = router.FindRoute(input)
 	if err != nil {
 		t.Fatal()
 	}
 	if route.Dest != "root" {
+		t.Error()
+	}
+	if len(params) != 0 {
 		t.Error()
 	}
 
@@ -46,8 +52,11 @@ func TestFindRouteAPI(t *testing.T) {
 	if err != nil {
 		t.Fatal()
 	}
-	route = router.FindRouteFromURL(url_obj)
+	route, params = router.FindRouteFromURL(url_obj)
 	if route.Dest != "root" {
+		t.Error()
+	}
+	if len(params) != 0 {
 		t.Error()
 	}
 }
@@ -64,13 +73,16 @@ func TestNoRoute(t *testing.T) {
 	}
 
 	input := "http://example.org/notfound"
-	route, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input)
 	if err != nil {
 		t.Fatal()
 	}
 
 	if route != nil {
 		t.Error("should not be able to find a route")
+	}
+	if params != nil {
+		t.Error("params must be nil too")
 	}
 }
 
@@ -116,13 +128,16 @@ func TestRouteOrder(t *testing.T) {
 	}
 
 	input := "http://example.org/r/123"
-	route, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input)
 	if err != nil {
 		t.Fatal()
 	}
 
 	if route.Dest != "first" {
 		t.Errorf("both match, expected the first defined, got %s", route.Dest)
+	}
+	if params["id"] != "123" {
+		t.Error()
 	}
 }
 
@@ -147,12 +162,15 @@ func TestSimpleExample(t *testing.T) {
 	}
 
 	input := "http://example.org/resources/123"
-	route, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input)
 	if err != nil {
 		t.Fatal()
 	}
 
 	if route.Dest != "one_resource" {
+		t.Error()
+	}
+	if params["id"] != "123" {
 		t.Error()
 	}
 }

@@ -26,11 +26,12 @@
 //	}
 //
 //	input := "http://example.org/resources/123"
-//	route, err := router.FindRoute(input)
+//	route, params, err := router.FindRoute(input)
 //	if err != nil {
 //		panic(err)
 //	}
 //	fmt.Print(route.Dest)
+//	fmt.Print(params["id"])
 //
 package urlrouter
 
@@ -96,39 +97,46 @@ func (self *Router) Start() error {
 	return nil
 }
 
-// Return the first matching Route for the given URL object.
-func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route {
+// Return the first matching Route and the corresponding parameters for a given URL object.
+func (self *Router) FindRouteFromURL(url_obj *url.URL) (*Route, map[string]string) {
 
 	// lookup the routes in the Trie
 	// TODO verify url encoding
-	routes := self.trie.FindRoutes(url_obj.Path)
+	matches := self.trie.FindRoutes(url_obj.Path)
 
 	// only return the first Route that matches
 	min_index := -1
-	for _, r := range routes {
-		route := r.(*Route)
-		i := self.index[route]
-		if min_index == -1 || i < min_index {
-			min_index = i
+	matches_by_index := map[int]*trie.Match{}
+
+	for _, match := range matches {
+		route := match.Route.(*Route)
+		route_index := self.index[route]
+		matches_by_index[route_index] = match
+		if min_index == -1 || route_index < min_index {
+			min_index = route_index
 		}
 	}
 
 	if min_index == -1 {
 		// no route found
-		return nil
+		return nil, nil
 	}
 
-	return &self.Routes[min_index]
+	// and the corresponding params
+	match := matches_by_index[min_index]
+
+	return match.Route.(*Route), match.Params
 }
 
 // Parse the url string (complete or just the path) and call FindRouteFromURL
-func (self *Router) FindRoute(url_str string) (*Route, error) {
+func (self *Router) FindRoute(url_str string) (*Route, map[string]string, error) {
 
 	// parse the url
 	url_obj, err := url.Parse(url_str)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return self.FindRouteFromURL(url_obj), nil
+	route, params := self.FindRouteFromURL(url_obj)
+	return route, params, nil
 }

@@ -8,11 +8,17 @@
 //  TBD
 package trie
 
-// TODO support param map for matched routes
-
 import (
 	"errors"
 )
+
+func split_param(remaining string) (string, string) {
+	i := 0
+	for len(remaining) > i && remaining[i] != '/' && remaining[i] != '.' {
+		i++
+	}
+	return remaining[:i], remaining[i:]
+}
 
 // A Node of the Trie
 type Node struct {
@@ -20,15 +26,9 @@ type Node struct {
 	Children       map[string]*Node
 	ChildrenKeyLen int
 	ParamChild     *Node
+	ParamName      string
 	SplatChild     *Node
-}
-
-func get_param_remaining(remaining string) string {
-	i := 0
-	for len(remaining) > i && remaining[i] != '/' && remaining[i] != '.' {
-		i++
-	}
-	return remaining[i:]
+	SplatName      string
 }
 
 func (self *Node) add_route(path string, route interface{}) error {
@@ -48,16 +48,20 @@ func (self *Node) add_route(path string, route interface{}) error {
 
 	if token[0] == ':' {
 		// :param case
-		remaining = get_param_remaining(remaining)
+		var name string
+		name, remaining = split_param(remaining)
 		if self.ParamChild == nil {
 			self.ParamChild = &Node{}
+			self.ParamName = name
 		}
 		next_node = self.ParamChild
 	} else if token[0] == '*' {
 		// *splat case
+		name := remaining
 		remaining = ""
 		if self.SplatChild == nil {
 			self.SplatChild = &Node{}
+			self.SplatName = name
 		}
 		next_node = self.SplatChild
 	} else {
@@ -75,50 +79,95 @@ func (self *Node) add_route(path string, route interface{}) error {
 	return next_node.add_route(remaining, route)
 }
 
-func (self *Node) find_routes(path string) []interface{} {
+// utility for the Node.find_route recursive method
+type pstack struct {
+	params []map[string]string
+}
 
-	routes := []interface{}{}
+func (self *pstack) add(name, value string) {
+	self.params = append(
+		self.params,
+		map[string]string{name: value},
+	)
+}
 
+func (self *pstack) pop() {
+	self.params = self.params[:len(self.params)-1]
+}
+
+func (self *pstack) as_map() map[string]string {
+	// assume that all param of a route have unique names
+	r := map[string]string{}
+	for _, param := range self.params {
+		for key, value := range param {
+			r[key] = value
+		}
+	}
+	return r
+}
+
+type Match struct {
+	// same Route as in Node
+	Route interface{}
+	// map of params matched for this result
+	Params map[string]string
+}
+
+func (self *Node) find_routes(path string, stack *pstack) []*Match {
+
+	matches := []*Match{}
+
+	// route found !
 	if self.Route != nil && path == "" {
-		routes = append(routes, self.Route)
+		matches = append(
+			matches,
+			&Match{
+				Route:  self.Route,
+				Params: stack.as_map(),
+			},
+		)
 	}
 
 	if len(path) == 0 {
-		return routes
+		return matches
 	}
 
 	// *splat branch
 	if self.SplatChild != nil {
-		routes = append(
-			routes,
-			self.SplatChild.find_routes("")...,
+		stack.add(self.SplatName, path)
+		matches = append(
+			matches,
+			self.SplatChild.find_routes("", stack)...,
 		)
+		stack.pop()
 	}
 
 	// :param branch
 	if self.ParamChild != nil {
-		remaining := get_param_remaining(path)
-		routes = append(
-			routes,
-			self.ParamChild.find_routes(remaining)...,
+		value, remaining := split_param(path)
+		stack.add(self.ParamName, value)
+		matches = append(
+			matches,
+			self.ParamChild.find_routes(remaining, stack)...,
 		)
+		stack.pop()
 	}
 
 	// main branch
 	length := self.ChildrenKeyLen
 	if len(path) < length {
-		return routes
+		return matches
 	}
 	token := path[0:length]
 	remaining := path[length:]
 	if self.Children[token] != nil {
-		routes = append(
-			routes,
-			self.Children[token].find_routes(remaining)...,
+		matches = append(
+			matches,
+			self.Children[token].find_routes(remaining, stack)...,
 		)
 	}
 
-	return routes
+	return matches
 }
 
 func (self *Node) compress() {
@@ -178,8 +227,8 @@ func (self *Trie) AddRoute(path string, route interface{}) error {
 }
 
 // Given a path, return all the matchin routes.
-func (self *Trie) FindRoutes(path string) []interface{} {
-	return self.Root.find_routes(path)
+func (self *Trie) FindRoutes(path string) []*Match {
+	return self.Root.find_routes(path, &pstack{})
 }
 
 // Reduce the size of the tree, must be done after the last AddRoute.

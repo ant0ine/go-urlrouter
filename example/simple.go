@@ -26,9 +26,10 @@ func main() {
 	}
 
 	input := "http://example.org/resources/123"
-	route, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Print(route.Dest)
+	fmt.Print(params["id"])
 }
