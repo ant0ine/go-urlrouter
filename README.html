@@ -1,0 +1,244 @@
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/ant0ine/go-urlrouter"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index">Index</a></dd>
+			
+			
+			
+				<dd><a href="#pkg-subdirectories">Subdirectories</a></dd>
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+Efficient URL routing using a Trie data structure.
+</p>
+<p>
+This Package implements a URL Router, but instead of using the usual
+&#34;evaluate all the routes and return the first regexp that matches&#34; strategy,
+it uses a Trie data structure to perform the routing. This is more efficient,
+and scales better for a large number of routes.
+It supports the :param and *splat placeholders in the route strings.
+</p>
+<p>
+Example:
+</p>
+<pre>router := urlrouter.Router{
+	Routes: []urlrouter.Route{
+		urlrouter.Route{
+			PathExp: &#34;/resources/:id&#34;,
+			Dest:    &#34;one_resource&#34;,
+		},
+		urlrouter.Route{
+			PathExp: &#34;/resources&#34;,
+			Dest:    &#34;all_resources&#34;,
+		},
+	},
+}
+
+err := router.Start()
+if err != nil {
+	panic(err)
+}
+
+input := &#34;<a href="http://example.org/resources/123">http://example.org/resources/123</a>&#34;
+route, err := router.FindRoute(input)
+if err != nil {
+	panic(err)
+}
+fmt.Print(route.Dest)
+</pre>
+
+			</div>
+		</div>
+		
+	
+		<h2 id="pkg-index">Index</h2>
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+		<div id="manual-nav">
+			<dl>
+			
+			
+			
+			
+				
+				<dd><a href="#Route">type Route</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Router">type Router</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Router.FindRoute">func (self *Router) FindRoute(url_str string) (*Route, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Router.FindRouteFromURL">func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Router.Start">func (self *Router) Start() error</a></dd>
+				
+			
+			
+		</dl>
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/target/router.go">router.go</a>
+			
+			</span>
+			</p>
+		
+	
+		
+		
+		
+		
+			
+			
+			<h2 id="Route">type <a href="/target/router.go?s=1086:1421#L37">Route</a></h2>
+			<pre>type Route struct {
+    <span class="comment">// A string defining the route, like &#34;/resource/:id.json&#34;.</span>
+    <span class="comment">// Placeholders supported are:</span>
+    <span class="comment">// :param that matches any char to the first &#39;/&#39; or &#39;.&#39;</span>
+    <span class="comment">// *splat that matches everything to the end of the string</span>
+    PathExp string
+    <span class="comment">// Can be anything useful to point to the code to run for this route.</span>
+    Dest interface{}
+}</pre>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Router">type <a href="/target/router.go?s=1423:1588#L47">Router</a></h2>
+			<pre>type Router struct {
+    Routes []Route
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+				<h3 id="Router.FindRoute">func (*Router) <a href="/target/router.go?s=2996:3057#L115">FindRoute</a></h3>
+				<pre>func (self *Router) FindRoute(url_str string) (*Route, error)</pre>
+				<p>
+Parse the url string (complete or just the path) and call FindRouteFromURL
+</p>
+
+				
+				
+			
+				
+				<h3 id="Router.FindRouteFromURL">func (*Router) <a href="/target/router.go?s=2447:2508#L90">FindRouteFromURL</a></h3>
+				<pre>func (self *Router) FindRouteFromURL(url_obj *url.URL) *Route</pre>
+				<p>
+Return the first matching Route for the given URL object.
+</p>
+
+				
+				
+			
+				
+				<h3 id="Router.Start">func (*Router) <a href="/target/router.go?s=1740:1773#L56">Start</a></h3>
+				<pre>func (self *Router) Start() error</pre>
+				<p>
+This validates the Routes and prepares the Trie data structure.
+It must be called once the Routes are defined and before trying to find Routes.
+</p>
+
+				
+				
+			
+		
+		</div>
+	
+
+	
+
+
+
+
+
+
+
+	
+	
+		<h2 id="pkg-subdirectories">Subdirectories</h2>
+	
+	<table class="dir">
+	<tr>
+	<th>Name</th>
+	<th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+	<th style="text-align: left; width: auto">Synopsis</th>
+	</tr>
+	
+		<tr>
+		<td><a href="..">..</a></td>
+		</tr>
+	
+	
+		
+			<tr>
+			<td class="name"><a href="example/">example</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+		
+			<tr>
+			<td class="name"><a href="trie/">trie</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+	</table>
+	
+
