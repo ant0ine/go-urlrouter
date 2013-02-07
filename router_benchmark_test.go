@@ -4,9 +4,12 @@ import (
 	"net/url"
 	"regexp"
 	"testing"
+        "fmt"
 )
 
 func routes() []Route {
+        // simulate the routes of a real but reasonable app.
+        // 6 + 10 * (5 + 2) + 1 = 77 routes
 	route_paths := []string{
 		"/",
 		"/signin",
@@ -14,34 +17,37 @@ func routes() []Route {
 		"/profile",
 		"/settings",
 		"/upload/*file",
-		"/apps/:id/property1",
-		"/apps/:id/property2",
-		"/apps/:id/property3",
-		"/apps/:id/property4",
-		"/apps/:id/property5",
-		"/apps/:id",
-		"/apps",
-		"/users/:id/property1",
-		"/users/:id/property2",
-		"/users/:id/property3",
-		"/users/:id/property4",
-		"/users/:id/property5",
-		"/users/:id",
-		"/users",
-		"/resources/:id/property1",
-		"/resources/:id/property2",
-		"/resources/:id/property3",
-		"/resources/:id/property4",
-		"/resources/:id/property5",
-		"/resources/:id",
-		"/resources",
-		"/*",
-	}
+        }
+        for i := 0; i < 10; i++ {
+                for j := 0; j < 5; j++ {
+		        route_paths = append(route_paths, fmt.Sprintf("/resource%d/:id/property%d", i, j))
+                }
+		route_paths = append(route_paths, fmt.Sprintf("/resource%d/:id", i))
+		route_paths = append(route_paths, fmt.Sprintf("/resource%d", i))
+        }
+	route_paths = append(route_paths, "/*")
+
 	routes := []Route{}
 	for _, path := range route_paths {
 		routes = append(routes, Route{PathExp: path, Dest: path})
 	}
 	return routes
+}
+
+func request_urls() []*url.URL {
+        // simulate a few requests
+	url_strs := []string{
+                "http://example.org/",
+                "http://example.org/resource9/123",
+                "http://example.org/resource9/123/property1",
+                "http://example.org/doesnotexist",
+        }
+	url_objs := []*url.URL{}
+        for _, url_str := range url_strs {
+                url_obj, _ := url.Parse(url_str)
+                url_objs = append(url_objs, url_obj)
+        }
+        return url_objs
 }
 
 func BenchmarkNoCompression(b *testing.B) {
@@ -53,12 +59,14 @@ func BenchmarkNoCompression(b *testing.B) {
 		disable_trie_compression: true,
 	}
 	router.Start()
-	url_obj, _ := url.Parse("http://example.org/resources/123")
+        url_objs := request_urls()
 
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		router.FindRouteFromURL(url_obj)
+                for _, url_obj := range url_objs {
+                        router.FindRouteFromURL(url_obj)
+                }
 	}
 }
 
@@ -70,12 +78,14 @@ func BenchmarkCompression(b *testing.B) {
 		Routes: routes(),
 	}
 	router.Start()
-	url_obj, _ := url.Parse("http://example.org/resources/123")
+        url_objs := request_urls()
 
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		router.FindRouteFromURL(url_obj)
+                for _, url_obj := range url_objs {
+                        router.FindRouteFromURL(url_obj)
+                }
 	}
 }
 
@@ -85,6 +95,7 @@ func BenchmarkRegExpLoop(b *testing.B) {
 	b.StopTimer()
 
 	routes := routes()
+        url_objs := request_urls()
 
 	// build the route regexps
 	r1, err := regexp.Compile(":[^/\\.]*")
@@ -112,17 +123,18 @@ func BenchmarkRegExpLoop(b *testing.B) {
 		route_regexps = append(route_regexps, *reg)
 	}
 
-	// url to route
-	url_obj, _ := url.Parse("http://example.org/resources/123")
-
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		for index, reg := range route_regexps {
-			if reg.MatchString(url_obj.Path) {
-				_ = routes[index]
-				break
-			}
-		}
+                // do it for a few urls
+                for _, url_obj := range url_objs {
+                        // stop at the first route that matches
+                        for index, reg := range route_regexps {
+                                if reg.MatchString(url_obj.Path) {
+                                        _ = routes[index]
+                                        break
+                                }
+                        }
+                }
 	}
 }
