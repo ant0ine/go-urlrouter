@@ -49,6 +49,7 @@ type Route struct {
 }
 
 type Router struct {
+    // list of Routes, the order matters, if multiple Routes match, the first defined will be used.
     Routes []Route
     // contains filtered or unexported fields
 }

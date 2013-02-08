@@ -56,7 +56,7 @@ type Route struct {
 }
 
 type Router struct {
-        // list of Routes, the order matters, if multiple Routes match, the first defined will be used.
+	// list of Routes, the order matters, if multiple Routes match, the first defined will be used.
 	Routes                   []Route
 	disable_trie_compression bool
 	index                    map[*Route]int
