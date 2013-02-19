@@ -33,6 +33,7 @@
 //	fmt.Print(route.Dest)  // one_resource
 //	fmt.Print(params["id"])  // 123
 //
+// (Blog Post: http://blog.ant0ine.com/typepad/2013/02/better-url-routing-golang-1.html)
 package urlrouter
 
 import (
