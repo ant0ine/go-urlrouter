@@ -44,6 +44,7 @@ import (
 // TODO
 // support for http method routing ?
 // support for #param placeholder ?
+// replace map[string]string by a PathParams object for more flexibility, and support for multiple param with the same names, eg: /users/:id/blogs/:id ?
 
 type Route struct {
 	// A string defining the route, like "/resource/:id.json".
