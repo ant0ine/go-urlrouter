@@ -1,2 +1,4 @@
 language: go
-script: go get github.com/ant0ine/go-urlrouter && go test
+install:
+  - go get github.com/ant0ine/go-urlrouter
+script: go test
