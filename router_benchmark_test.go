@@ -110,8 +110,8 @@ func BenchmarkRegExpLoop(b *testing.B) {
 	for _, route := range routes {
 
 		// generate the regexp string
-		reg_str := r2.ReplaceAllString(route.PathExp, "[^/\\.]+")
-		reg_str = r1.ReplaceAllString(reg_str, ".+")
+		reg_str := r2.ReplaceAllString(route.PathExp, "([^/\\.]+)")
+		reg_str = r1.ReplaceAllString(reg_str, "(.+)")
 		reg_str = "^" + reg_str + "$"
 
 		// compile it
@@ -130,7 +130,7 @@ func BenchmarkRegExpLoop(b *testing.B) {
 		for _, url_obj := range url_objs {
 			// stop at the first route that matches
 			for index, reg := range route_regexps {
-				if reg.MatchString(url_obj.Path) {
+				if reg.FindAllString(url_obj.Path, 1) != nil {
 					_ = routes[index]
 					break
 				}
