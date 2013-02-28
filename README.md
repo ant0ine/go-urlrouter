@@ -40,7 +40,7 @@ Example
 More Examples
 -------------
 
-- [Countries](https://github.com/ant0ine/go-urlrouter/blob/master/examples/webserver.go) Demo how to use the router with `net/http`
+- [Web Server](https://github.com/ant0ine/go-urlrouter/blob/master/examples/webserver.go) Demo how to use the router with `net/http`
 - [Go-Json-Rest](https://github.com/ant0ine/go-json-rest) A quick and easy way to setup a RESTful JSON API
 
 Documentation
