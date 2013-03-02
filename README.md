@@ -9,6 +9,13 @@ Go-UrlRouter
 This Package implements a URL Router, but instead of using the usual "evaluate all the routes and return the first regexp that matches"
 strategy, it uses a Trie data structure to perform the routing. This is more efficient, and scales better for a large number of routes. It supports the :param and \*splat placeholders in the route strings.
 
+Install
+-------
+
+This package is "go-gettable", just do:
+
+    go get github.com/ant0ine/go-urlrouter
+
 Example
 -------
 
