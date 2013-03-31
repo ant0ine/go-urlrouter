@@ -10,6 +10,7 @@ package trie
 
 import (
 	"errors"
+        "fmt"
 )
 
 func splitParam(remaining string) (string, string) {
@@ -96,10 +97,15 @@ func (self *pstack) pop() {
 }
 
 func (self *pstack) asMap() map[string]string {
-	// assume that all param of a route have unique names
 	r := map[string]string{}
 	for _, param := range self.params {
 		for key, value := range param {
+                        if r[key] != "" {
+                                panic(fmt.Sprintf(
+                                        "placeholder %s already found, placeholder names should be unique per route",
+                                        key,
+                                ))
+                        }
 			r[key] = value
 		}
 	}
