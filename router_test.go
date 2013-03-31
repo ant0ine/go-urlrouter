@@ -48,11 +48,11 @@ func TestFindRouteAPI(t *testing.T) {
 	}
 
 	// url object
-	url_obj, err := url.Parse("http://example.org/")
+	urlObj, err := url.Parse("http://example.org/")
 	if err != nil {
 		t.Fatal()
 	}
-	route, params = router.FindRouteFromURL(url_obj)
+	route, params = router.FindRouteFromURL(urlObj)
 	if route.Dest != "root" {
 		t.Error()
 	}

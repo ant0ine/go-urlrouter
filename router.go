@@ -59,10 +59,10 @@ type Route struct {
 
 type Router struct {
 	// list of Routes, the order matters, if multiple Routes match, the first defined will be used.
-	Routes                   []Route
-	disable_trie_compression bool
-	index                    map[*Route]int
-	trie                     *trie.Trie
+	Routes                 []Route
+	disableTrieCompression bool
+	index                  map[*Route]int
+	trie                   *trie.Trie
 }
 
 // This validates the Routes and prepares the Trie data structure.
@@ -90,7 +90,7 @@ func (self *Router) Start() error {
 		}
 	}
 
-	if self.disable_trie_compression == false {
+	if self.disableTrieCompression == false {
 		self.trie.Compress()
 	}
 
@@ -101,45 +101,45 @@ func (self *Router) Start() error {
 }
 
 // Return the first matching Route and the corresponding parameters for a given URL object.
-func (self *Router) FindRouteFromURL(url_obj *url.URL) (*Route, map[string]string) {
+func (self *Router) FindRouteFromURL(urlObj *url.URL) (*Route, map[string]string) {
 
 	// lookup the routes in the Trie
 	// TODO verify url encoding
-	matches := self.trie.FindRoutes(url_obj.Path)
+	matches := self.trie.FindRoutes(urlObj.Path)
 
 	// only return the first Route that matches
-	min_index := -1
-	matches_by_index := map[int]*trie.Match{}
+	minIndex := -1
+	matchesByIndex := map[int]*trie.Match{}
 
 	for _, match := range matches {
 		route := match.Route.(*Route)
-		route_index := self.index[route]
-		matches_by_index[route_index] = match
-		if min_index == -1 || route_index < min_index {
-			min_index = route_index
+		routeIndex := self.index[route]
+		matchesByIndex[routeIndex] = match
+		if minIndex == -1 || routeIndex < minIndex {
+			minIndex = routeIndex
 		}
 	}
 
-	if min_index == -1 {
+	if minIndex == -1 {
 		// no route found
 		return nil, nil
 	}
 
 	// and the corresponding params
-	match := matches_by_index[min_index]
+	match := matchesByIndex[minIndex]
 
 	return match.Route.(*Route), match.Params
 }
 
 // Parse the url string (complete or just the path) and return the first matching Route and the corresponding parameters.
-func (self *Router) FindRoute(url_str string) (*Route, map[string]string, error) {
+func (self *Router) FindRoute(urlStr string) (*Route, map[string]string, error) {
 
 	// parse the url
-	url_obj, err := url.Parse(url_str)
+	urlObj, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	route, params := self.FindRouteFromURL(url_obj)
+	route, params := self.FindRouteFromURL(urlObj)
 	return route, params, nil
 }

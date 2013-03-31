@@ -98,7 +98,7 @@ func TestDupeInsert(t *testing.T) {
 	}
 }
 
-func is_in_matches(test string, matches []*Match) bool {
+func isInMatches(test string, matches []*Match) bool {
 	for _, match := range matches {
 		if match.Route.(string) == test {
 			return true
@@ -122,7 +122,7 @@ func TestFindRoute(t *testing.T) {
 	if len(matches) != 1 {
 		t.Errorf("expected one route, got %d", len(matches))
 	}
-	if !is_in_matches("root", matches) {
+	if !isInMatches("root", matches) {
 		t.Error("expected 'root'")
 	}
 
@@ -135,7 +135,7 @@ func TestFindRoute(t *testing.T) {
 	if len(matches) != 1 {
 		t.Errorf("expected one route, got %d", len(matches))
 	}
-	if !is_in_matches("resource", matches) {
+	if !isInMatches("resource", matches) {
 		t.Errorf("expected 'resource', got %+v", matches)
 	}
 	if matches[0].Params["id"] != "1" {
@@ -146,7 +146,7 @@ func TestFindRoute(t *testing.T) {
 	if len(matches) != 1 {
 		t.Errorf("expected one route, got %d", len(matches))
 	}
-	if !is_in_matches("property", matches) {
+	if !isInMatches("property", matches) {
 		t.Error("expected 'property'")
 	}
 	if matches[0].Params["id"] != "1" {
@@ -157,7 +157,7 @@ func TestFindRoute(t *testing.T) {
 	if len(matches) != 1 {
 		t.Errorf("expected one route, got %d", len(matches))
 	}
-	if !is_in_matches("property_format", matches) {
+	if !isInMatches("property_format", matches) {
 		t.Error("expected 'property_format'")
 	}
 	if matches[0].Params["id"] != "1" {
@@ -185,10 +185,10 @@ func TestFindRouteMultipleMatches(t *testing.T) {
 	if len(matches) != 2 {
 		t.Errorf("expected two matches, got %d", len(matches))
 	}
-	if !is_in_matches("resource_generic", matches) {
+	if !isInMatches("resource_generic", matches) {
 		t.Error()
 	}
-	if !is_in_matches("resource1", matches) {
+	if !isInMatches("resource1", matches) {
 		t.Error()
 	}
 
@@ -196,10 +196,10 @@ func TestFindRouteMultipleMatches(t *testing.T) {
 	if len(matches) != 2 {
 		t.Errorf("expected two matches, got %d", len(matches))
 	}
-	if !is_in_matches("special_all", matches) {
+	if !isInMatches("special_all", matches) {
 		t.Error()
 	}
-	if !is_in_matches("special_generic", matches) {
+	if !isInMatches("special_generic", matches) {
 		t.Error()
 	}
 }

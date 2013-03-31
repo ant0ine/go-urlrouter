@@ -12,7 +12,7 @@ import (
 	"errors"
 )
 
-func split_param(remaining string) (string, string) {
+func splitParam(remaining string) (string, string) {
 	i := 0
 	for len(remaining) > i && remaining[i] != '/' && remaining[i] != '.' {
 		i++
@@ -31,7 +31,7 @@ type Node struct {
 	SplatName      string
 }
 
-func (self *Node) add_route(path string, route interface{}) error {
+func (self *Node) addRoute(path string, route interface{}) error {
 
 	if len(path) == 0 {
 		// end of the path, set the Route
@@ -44,17 +44,17 @@ func (self *Node) add_route(path string, route interface{}) error {
 
 	token := path[0:1]
 	remaining := path[1:]
-	var next_node *Node
+	var nextNode *Node
 
 	if token[0] == ':' {
 		// :param case
 		var name string
-		name, remaining = split_param(remaining)
+		name, remaining = splitParam(remaining)
 		if self.ParamChild == nil {
 			self.ParamChild = &Node{}
 			self.ParamName = name
 		}
-		next_node = self.ParamChild
+		nextNode = self.ParamChild
 	} else if token[0] == '*' {
 		// *splat case
 		name := remaining
@@ -63,7 +63,7 @@ func (self *Node) add_route(path string, route interface{}) error {
 			self.SplatChild = &Node{}
 			self.SplatName = name
 		}
-		next_node = self.SplatChild
+		nextNode = self.SplatChild
 	} else {
 		// general case
 		if self.Children == nil {
@@ -73,13 +73,13 @@ func (self *Node) add_route(path string, route interface{}) error {
 		if self.Children[token] == nil {
 			self.Children[token] = &Node{}
 		}
-		next_node = self.Children[token]
+		nextNode = self.Children[token]
 	}
 
-	return next_node.add_route(remaining, route)
+	return nextNode.addRoute(remaining, route)
 }
 
-// utility for the Node.find_route recursive method
+// utility for the Node.findRoute recursive method
 type pstack struct {
 	params []map[string]string
 }
@@ -95,7 +95,7 @@ func (self *pstack) pop() {
 	self.params = self.params[:len(self.params)-1]
 }
 
-func (self *pstack) as_map() map[string]string {
+func (self *pstack) asMap() map[string]string {
 	// assume that all param of a route have unique names
 	r := map[string]string{}
 	for _, param := range self.params {
@@ -113,7 +113,7 @@ type Match struct {
 	Params map[string]string
 }
 
-func (self *Node) find_routes(path string, stack *pstack) []*Match {
+func (self *Node) findRoutes(path string, stack *pstack) []*Match {
 
 	matches := []*Match{}
 
@@ -123,7 +123,7 @@ func (self *Node) find_routes(path string, stack *pstack) []*Match {
 			matches,
 			&Match{
 				Route:  self.Route,
-				Params: stack.as_map(),
+				Params: stack.asMap(),
 			},
 		)
 	}
@@ -137,18 +137,18 @@ func (self *Node) find_routes(path string, stack *pstack) []*Match {
 		stack.add(self.SplatName, path)
 		matches = append(
 			matches,
-			self.SplatChild.find_routes("", stack)...,
+			self.SplatChild.findRoutes("", stack)...,
 		)
 		stack.pop()
 	}
 
 	// :param branch
 	if self.ParamChild != nil {
-		value, remaining := split_param(path)
+		value, remaining := splitParam(path)
 		stack.add(self.ParamName, value)
 		matches = append(
 			matches,
-			self.ParamChild.find_routes(remaining, stack)...,
+			self.ParamChild.findRoutes(remaining, stack)...,
 		)
 		stack.pop()
 	}
@@ -163,7 +163,7 @@ func (self *Node) find_routes(path string, stack *pstack) []*Match {
 	if self.Children[token] != nil {
 		matches = append(
 			matches,
-			self.Children[token].find_routes(remaining, stack)...,
+			self.Children[token].findRoutes(remaining, stack)...,
 		)
 	}
 
@@ -184,19 +184,19 @@ func (self *Node) compress() {
 		return
 	}
 	// compressable ?
-	can_compress := true
+	canCompress := true
 	for _, node := range self.Children {
 		if node.Route != nil || node.SplatChild != nil || node.ParamChild != nil {
-			can_compress = false
+			canCompress = false
 		}
 	}
 	// compress
-	if can_compress {
+	if canCompress {
 		merged := map[string]*Node{}
 		for key, node := range self.Children {
-			for gd_key, gd_node := range node.Children {
-				merged_key := key + gd_key
-				merged[merged_key] = gd_node
+			for gdKey, gdNode := range node.Children {
+				mergedKey := key + gdKey
+				merged[mergedKey] = gdNode
 			}
 		}
 		self.Children = merged
@@ -223,12 +223,12 @@ func New() *Trie {
 
 // Insert the route in the Trie following or creating the Nodes corresponding to the path.
 func (self *Trie) AddRoute(path string, route interface{}) error {
-	return self.Root.add_route(path, route)
+	return self.Root.addRoute(path, route)
 }
 
 // Given a path, return all the matchin routes.
 func (self *Trie) FindRoutes(path string) []*Match {
-	return self.Root.find_routes(path, &pstack{})
+	return self.Root.findRoutes(path, &pstack{})
 }
 
 // Reduce the size of the tree, must be done after the last AddRoute.
