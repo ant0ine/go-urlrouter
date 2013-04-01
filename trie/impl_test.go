@@ -7,22 +7,22 @@ import (
 func TestPathInsert(t *testing.T) {
 
 	trie := New()
-	if trie.Root == nil {
+	if trie.root == nil {
 		t.Error()
 	}
 
 	trie.AddRoute("/", "1")
-	if trie.Root.Children["/"] == nil {
+	if trie.root.Children["/"] == nil {
 		t.Error()
 	}
 
 	trie.AddRoute("/r", "2")
-	if trie.Root.Children["/"].Children["r"] == nil {
+	if trie.root.Children["/"].Children["r"] == nil {
 		t.Error()
 	}
 
 	trie.AddRoute("/r/", "3")
-	if trie.Root.Children["/"].Children["r"].Children["/"] == nil {
+	if trie.root.Children["/"].Children["r"].Children["/"] == nil {
 		t.Error()
 	}
 }
@@ -34,21 +34,21 @@ func TestTrieCompression(t *testing.T) {
 	trie.AddRoute("/adc", "3")
 
 	// before compression
-	if trie.Root.Children["/"].Children["a"].Children["b"].Children["c"] == nil {
+	if trie.root.Children["/"].Children["a"].Children["b"].Children["c"] == nil {
 		t.Error()
 	}
-	if trie.Root.Children["/"].Children["a"].Children["d"].Children["c"] == nil {
+	if trie.root.Children["/"].Children["a"].Children["d"].Children["c"] == nil {
 		t.Error()
 	}
 
 	trie.Compress()
 
 	// after compression
-	if trie.Root.Children["/abc"] == nil {
-		t.Errorf("%+v", trie.Root)
+	if trie.root.Children["/abc"] == nil {
+		t.Errorf("%+v", trie.root)
 	}
-	if trie.Root.Children["/adc"] == nil {
-		t.Errorf("%+v", trie.Root)
+	if trie.root.Children["/adc"] == nil {
+		t.Errorf("%+v", trie.root)
 	}
 
 }
@@ -56,24 +56,24 @@ func TestParamInsert(t *testing.T) {
 	trie := New()
 
 	trie.AddRoute("/:id/", "")
-	if trie.Root.Children["/"].ParamChild.Children["/"] == nil {
+	if trie.root.Children["/"].ParamChild.Children["/"] == nil {
 		t.Error()
 	}
-	if trie.Root.Children["/"].ParamName != "id" {
+	if trie.root.Children["/"].ParamName != "id" {
 		t.Error()
 	}
 
 	trie.AddRoute("/:id/:property.:format", "")
-	if trie.Root.Children["/"].ParamChild.Children["/"].ParamChild.Children["."].ParamChild == nil {
+	if trie.root.Children["/"].ParamChild.Children["/"].ParamChild.Children["."].ParamChild == nil {
 		t.Error()
 	}
-	if trie.Root.Children["/"].ParamName != "id" {
+	if trie.root.Children["/"].ParamName != "id" {
 		t.Error()
 	}
-	if trie.Root.Children["/"].ParamChild.Children["/"].ParamName != "property" {
+	if trie.root.Children["/"].ParamChild.Children["/"].ParamName != "property" {
 		t.Error()
 	}
-	if trie.Root.Children["/"].ParamChild.Children["/"].ParamChild.Children["."].ParamName != "format" {
+	if trie.root.Children["/"].ParamChild.Children["/"].ParamChild.Children["."].ParamName != "format" {
 		t.Error()
 	}
 }
@@ -81,7 +81,7 @@ func TestParamInsert(t *testing.T) {
 func TestSplatInsert(t *testing.T) {
 	trie := New()
 	trie.AddRoute("/*splat", "")
-	if trie.Root.Children["/"].SplatChild == nil {
+	if trie.root.Children["/"].SplatChild == nil {
 		t.Error()
 	}
 }
@@ -93,7 +93,7 @@ func TestDupeInsert(t *testing.T) {
 	if err == nil {
 		t.Error()
 	}
-	if trie.Root.Children["/"].Route != "1" {
+	if trie.root.Children["/"].Route != "1" {
 		t.Error()
 	}
 }

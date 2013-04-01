@@ -10,7 +10,7 @@ package trie
 
 import (
 	"errors"
-        "fmt"
+	"fmt"
 )
 
 func splitParam(remaining string) (string, string) {
@@ -21,23 +21,22 @@ func splitParam(remaining string) (string, string) {
 	return remaining[:i], remaining[i:]
 }
 
-// A Node of the Trie
-type Node struct {
+type node struct {
 	Route          interface{}
-	Children       map[string]*Node
+	Children       map[string]*node
 	ChildrenKeyLen int
-	ParamChild     *Node
+	ParamChild     *node
 	ParamName      string
-	SplatChild     *Node
+	SplatChild     *node
 	SplatName      string
 }
 
-func (self *Node) addRoute(path string, route interface{}) error {
+func (self *node) addRoute(path string, route interface{}) error {
 
 	if len(path) == 0 {
 		// end of the path, set the Route
 		if self.Route != nil {
-			return errors.New("Node.Route already set, duplicated path")
+			return errors.New("node.Route already set, duplicated path")
 		}
 		self.Route = route
 		return nil
@@ -45,14 +44,14 @@ func (self *Node) addRoute(path string, route interface{}) error {
 
 	token := path[0:1]
 	remaining := path[1:]
-	var nextNode *Node
+	var nextNode *node
 
 	if token[0] == ':' {
 		// :param case
 		var name string
 		name, remaining = splitParam(remaining)
 		if self.ParamChild == nil {
-			self.ParamChild = &Node{}
+			self.ParamChild = &node{}
 			self.ParamName = name
 		}
 		nextNode = self.ParamChild
@@ -61,18 +60,18 @@ func (self *Node) addRoute(path string, route interface{}) error {
 		name := remaining
 		remaining = ""
 		if self.SplatChild == nil {
-			self.SplatChild = &Node{}
+			self.SplatChild = &node{}
 			self.SplatName = name
 		}
 		nextNode = self.SplatChild
 	} else {
 		// general case
 		if self.Children == nil {
-			self.Children = map[string]*Node{}
+			self.Children = map[string]*node{}
 			self.ChildrenKeyLen = 1
 		}
 		if self.Children[token] == nil {
-			self.Children[token] = &Node{}
+			self.Children[token] = &node{}
 		}
 		nextNode = self.Children[token]
 	}
@@ -80,7 +79,7 @@ func (self *Node) addRoute(path string, route interface{}) error {
 	return nextNode.addRoute(remaining, route)
 }
 
-// utility for the Node.findRoute recursive method
+// utility for the node.findRoute recursive method
 type pstack struct {
 	params []map[string]string
 }
@@ -100,12 +99,12 @@ func (self *pstack) asMap() map[string]string {
 	r := map[string]string{}
 	for _, param := range self.params {
 		for key, value := range param {
-                        if r[key] != "" {
-                                panic(fmt.Sprintf(
-                                        "placeholder %s already found, placeholder names should be unique per route",
-                                        key,
-                                ))
-                        }
+			if r[key] != "" {
+				panic(fmt.Sprintf(
+					"placeholder %s already found, placeholder names should be unique per route",
+					key,
+				))
+			}
 			r[key] = value
 		}
 	}
@@ -113,13 +112,13 @@ func (self *pstack) asMap() map[string]string {
 }
 
 type Match struct {
-	// same Route as in Node
+	// same Route as in node
 	Route interface{}
 	// map of params matched for this result
 	Params map[string]string
 }
 
-func (self *Node) findRoutes(path string, stack *pstack) []*Match {
+func (self *node) findRoutes(path string, stack *pstack) []*Match {
 
 	matches := []*Match{}
 
@@ -176,7 +175,7 @@ func (self *Node) findRoutes(path string, stack *pstack) []*Match {
 	return matches
 }
 
-func (self *Node) compress() {
+func (self *node) compress() {
 	// *splat branch
 	if self.SplatChild != nil {
 		self.SplatChild.compress()
@@ -198,7 +197,7 @@ func (self *Node) compress() {
 	}
 	// compress
 	if canCompress {
-		merged := map[string]*Node{}
+		merged := map[string]*node{}
 		for key, node := range self.Children {
 			for gdKey, gdNode := range node.Children {
 				mergedKey := key + gdKey
@@ -217,27 +216,27 @@ func (self *Node) compress() {
 }
 
 type Trie struct {
-	Root *Node
+	root *node
 }
 
-// Instanciate a Trie with an empty Node as the root.
+// Instanciate a Trie with an empty node as the root.
 func New() *Trie {
 	return &Trie{
-		Root: &Node{},
+		root: &node{},
 	}
 }
 
-// Insert the route in the Trie following or creating the Nodes corresponding to the path.
+// Insert the route in the Trie following or creating the nodes corresponding to the path.
 func (self *Trie) AddRoute(path string, route interface{}) error {
-	return self.Root.addRoute(path, route)
+	return self.root.addRoute(path, route)
 }
 
 // Given a path, return all the matchin routes.
 func (self *Trie) FindRoutes(path string) []*Match {
-	return self.Root.findRoutes(path, &pstack{})
+	return self.root.findRoutes(path, &pstack{})
 }
 
 // Reduce the size of the tree, must be done after the last AddRoute.
 func (self *Trie) Compress() {
-	self.Root.compress()
+	self.root.compress()
 }
