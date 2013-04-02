@@ -43,7 +43,6 @@ import (
 )
 
 // TODO
-// support for http method routing ?
 // support for #param placeholder ?
 // replace map[string]string by a PathParams object for more flexibility, and support for multiple param with the same names, eg: /users/:id/blogs/:id ?
 
