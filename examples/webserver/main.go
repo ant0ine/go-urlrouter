@@ -17,8 +17,10 @@ func Bonjour(w http.ResponseWriter, req *http.Request, params map[string]string)
 
 func main() {
 
-	router := urlrouter.Router{
-		Routes: []urlrouter.Route{
+	router := urlrouter.NewRouter()
+
+	error := router.AddRoutes(
+		[]urlrouter.Route{
 			urlrouter.Route{
 				PathExp: "/hello/:name",
 				Dest:    Hello,
@@ -28,6 +30,10 @@ func main() {
 				Dest:    Bonjour,
 			},
 		},
+	)
+
+	if error != nil {
+		panic(error)
 	}
 
 	router.Start()

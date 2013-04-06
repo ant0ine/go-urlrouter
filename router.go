@@ -7,8 +7,8 @@
 // It supports the :param and *splat placeholders in the route strings.
 //
 // Example:
-//	router := urlrouter.Router{
-//		Routes: []urlrouter.Route{
+//  router := urlrouter.NewRouter()
+//	err := router.AddRoutes([]urlrouter.Route{
 //			urlrouter.Route{
 //				PathExp: "/resources/:id",
 //				Dest:    "one_resource",
@@ -18,9 +18,12 @@
 //				Dest:    "all_resources",
 //			},
 //		},
-//	}
+//	})
 //
-//	err := router.Start()
+//  if err != nil {
+//      panic(err)
+//  }
+//	err = router.Start()
 //	if err != nil {
 //		panic(err)
 //	}
@@ -38,6 +41,7 @@ package urlrouter
 
 import (
 	"errors"
+	"fmt"
 	"github.com/ant0ine/go-urlrouter/trie"
 	"net/url"
 )
@@ -62,24 +66,48 @@ type Router struct {
 	disableTrieCompression bool
 	index                  map[*Route]int
 	trie                   *trie.Trie
+	routesIndex            map[string]bool
+}
+
+func (self *Router) AddRoutes(routes []Route) error {
+	for _, route := range routes {
+		error := self.AddRoute(route)
+		if error != nil {
+			return error
+		}
+	}
+	return nil
+}
+
+// Add a new route to the router.  If there's already a router with for this
+// path and HTTP method, an error is returned.
+func (self *Router) AddRoute(route Route) error {
+	if self.routesIndex[route.PathExp] == true {
+		return errors.New(fmt.Sprintf("Duplicated PathExp: %s", route.PathExp))
+	}
+	self.Routes = append(self.Routes, route)
+	self.routesIndex[route.PathExp] = true
+	return nil
+}
+
+// Returns a new router.
+func NewRouter() Router {
+	return Router{
+		Routes:      []Route{},
+		routesIndex: map[string]bool{},
+	}
 }
 
 // This validates the Routes and prepares the Trie data structure.
-// It must be called once the Routes are defined and before trying to find Routes.
+/// It must be called once the Routes are defined and before trying to find Routes.
 func (self *Router) Start() error {
 
 	self.trie = trie.New()
 	self.index = map[*Route]int{}
-	unique := map[string]bool{}
 
 	for i, _ := range self.Routes {
 		// pointer to the Route
 		route := &self.Routes[i]
-		// unique
-		if unique[route.PathExp] == true {
-			return errors.New("duplicated PathExp")
-		}
-		unique[route.PathExp] = true
 		// index
 		self.index[route] = i
 		// insert in the Trie

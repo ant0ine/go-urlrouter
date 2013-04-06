@@ -7,19 +7,18 @@ import (
 
 func TestFindRouteAPI(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{
-			Route{
-				PathExp: "/",
-				Dest:    "root",
-			},
-		},
-	}
+	router := NewRouter()
 
-	err := router.Start()
+	err := router.AddRoute(Route{
+		PathExp: "/",
+		Dest: "root",
+	})
+
 	if err != nil {
 		t.Fatal()
 	}
+
+	router.Start()
 
 	// full url string
 	input := "http://example.org/"
@@ -63,10 +62,7 @@ func TestFindRouteAPI(t *testing.T) {
 
 func TestNoRoute(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{},
-	}
-
+	router := NewRouter()
 	err := router.Start()
 	if err != nil {
 		t.Fatal()
@@ -88,20 +84,19 @@ func TestNoRoute(t *testing.T) {
 
 func TestDuplicatedRoute(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{
-			Route{
-				PathExp: "/",
-				Dest:    "root",
-			},
-			Route{
-				PathExp: "/",
-				Dest:    "the_same",
-			},
-		},
-	}
+	router := NewRouter()
 
-	err := router.Start()
+	err := router.AddRoutes([]Route{
+		Route{
+			PathExp: "/",
+			Dest:    "root",
+		},
+		Route{
+			PathExp: "/",
+			Dest:    "the_same",
+		},
+	})
+
 	if err == nil {
 		t.Error("expected the duplicated route error")
 	}
@@ -109,20 +104,23 @@ func TestDuplicatedRoute(t *testing.T) {
 
 func TestRouteOrder(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{
-			Route{
-				PathExp: "/r/:id",
-				Dest:    "first",
-			},
-			Route{
-				PathExp: "/r/*rest",
-				Dest:    "second",
-			},
+	router := NewRouter()
+	err := router.AddRoutes([]Route{
+		Route{
+			PathExp: "/r/:id",
+			Dest:    "first",
 		},
+		Route{
+			PathExp: "/r/*rest",
+			Dest:    "second",
+		},
+	})
+
+	if err != nil {
+		t.Fatal()
 	}
 
-	err := router.Start()
+	err = router.Start()
 	if err != nil {
 		t.Fatal()
 	}
@@ -143,20 +141,23 @@ func TestRouteOrder(t *testing.T) {
 
 func TestSimpleExample(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{
-			Route{
-				PathExp: "/resources/:id",
-				Dest:    "one_resource",
-			},
-			Route{
-				PathExp: "/resources",
-				Dest:    "all_resources",
-			},
+	router := NewRouter()
+	err := router.AddRoutes([]Route{
+		Route{
+			PathExp: "/resources/:id",
+			Dest:    "one_resource",
 		},
+		Route{
+			PathExp: "/resources",
+			Dest:    "all_resources",
+		},
+	})
+
+	if err != nil {
+		t.Fatal()
 	}
 
-	err := router.Start()
+	err = router.Start()
 	if err != nil {
 		t.Fatal()
 	}
