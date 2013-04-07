@@ -55,9 +55,11 @@ type Route struct {
 	// Placeholders supported are:
 	// :param that matches any char to the first '/' or '.'
 	// *splat that matches everything to the end of the string
-	PathExp string
+	// PathExp string
 	// Can be anything useful to point to the code to run for this route.
-	Dest interface{}
+	Dest       interface{}
+	HttpMethod string
+	Path       string
 }
 
 type Router struct {
@@ -82,11 +84,12 @@ func (self *Router) AddRoutes(routes []Route) error {
 // Add a new route to the router.  If there's already a router with for this
 // path and HTTP method, an error is returned.
 func (self *Router) AddRoute(route Route) error {
-	if self.routesIndex[route.PathExp] == true {
-		return errors.New(fmt.Sprintf("Duplicated PathExp: %s", route.PathExp))
+	PathExp := route.HttpMethod + route.Path
+	if self.routesIndex[PathExp] == true {
+		return errors.New(fmt.Sprintf("Duplicated PathExp: %s", PathExp))
 	}
 	self.Routes = append(self.Routes, route)
-	self.routesIndex[route.PathExp] = true
+	self.routesIndex[PathExp] = true
 	return nil
 }
 
@@ -111,7 +114,7 @@ func (self *Router) Start() error {
 		// index
 		self.index[route] = i
 		// insert in the Trie
-		err := self.trie.AddRoute(route.PathExp, route)
+		err := self.trie.AddRoute(route.Path, route.HttpMethod, route)
 		if err != nil {
 			return err
 		}
@@ -128,11 +131,11 @@ func (self *Router) Start() error {
 }
 
 // Return the first matching Route and the corresponding parameters for a given URL object.
-func (self *Router) FindRouteFromURL(urlObj *url.URL) (*Route, map[string]string) {
+func (self *Router) FindRouteFromURL(urlObj *url.URL, method string) (*Route, map[string]string) {
 
 	// lookup the routes in the Trie
 	// TODO verify url encoding
-	matches := self.trie.FindRoutes(urlObj.Path)
+	matches := self.trie.FindRoutes(urlObj.Path, method)
 
 	// only return the first Route that matches
 	minIndex := -1
@@ -159,7 +162,7 @@ func (self *Router) FindRouteFromURL(urlObj *url.URL) (*Route, map[string]string
 }
 
 // Parse the url string (complete or just the path) and return the first matching Route and the corresponding parameters.
-func (self *Router) FindRoute(urlStr string) (*Route, map[string]string, error) {
+func (self *Router) FindRoute(urlStr string, method string) (*Route, map[string]string, error) {
 
 	// parse the url
 	urlObj, err := url.Parse(urlStr)
@@ -167,6 +170,6 @@ func (self *Router) FindRoute(urlStr string) (*Route, map[string]string, error) 
 		return nil, nil, err
 	}
 
-	route, params := self.FindRouteFromURL(urlObj)
+	route, params := self.FindRouteFromURL(urlObj, method)
 	return route, params, nil
 }

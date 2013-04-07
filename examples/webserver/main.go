@@ -22,12 +22,14 @@ func main() {
 	error := router.AddRoutes(
 		[]urlrouter.Route{
 			urlrouter.Route{
-				PathExp: "/hello/:name",
-				Dest:    Hello,
+				Path:       "/hello/:name",
+				Dest:       Hello,
+				HttpMethod: "GET",
 			},
 			urlrouter.Route{
-				PathExp: "/bonjour/:name",
-				Dest:    Bonjour,
+				Path:       "/bonjour/:name",
+				Dest:       Bonjour,
+				HttpMethod: "GET",
 			},
 		},
 	)
@@ -39,7 +41,7 @@ func main() {
 	router.Start()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		route, params := router.FindRouteFromURL(r.URL)
+		route, params := router.FindRouteFromURL(r.URL, r.Method)
 		handler := route.Dest.(func(http.ResponseWriter, *http.Request, map[string]string))
 		handler(w, r, params)
 	})

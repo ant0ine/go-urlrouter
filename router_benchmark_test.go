@@ -29,7 +29,7 @@ func routes() []Route {
 
 	routes := []Route{}
 	for _, path := range routePaths {
-		routes = append(routes, Route{PathExp: path, Dest: path})
+		routes = append(routes, Route{Path: path, Dest: path})
 	}
 	return routes
 }
@@ -65,7 +65,7 @@ func BenchmarkNoCompression(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, urlObj := range urlObjs {
-			router.FindRouteFromURL(urlObj)
+			router.FindRouteFromURL(urlObj, "GET")
 		}
 	}
 }
@@ -84,7 +84,7 @@ func BenchmarkCompression(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, urlObj := range urlObjs {
-			router.FindRouteFromURL(urlObj)
+			router.FindRouteFromURL(urlObj, "GET")
 		}
 	}
 }
@@ -110,7 +110,7 @@ func BenchmarkRegExpLoop(b *testing.B) {
 	for _, route := range routes {
 
 		// generate the regexp string
-		regStr := r2.ReplaceAllString(route.PathExp, "([^/\\.]+)")
+		regStr := r2.ReplaceAllString(route.Path, "([^/\\.]+)")
 		regStr = r1.ReplaceAllString(regStr, "(.+)")
 		regStr = "^" + regStr + "$"
 

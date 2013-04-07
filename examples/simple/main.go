@@ -11,12 +11,12 @@ func main() {
 
 	err := router.AddRoutes([]urlrouter.Route{
 		urlrouter.Route{
-			PathExp: "/resources/:id",
-			Dest:    "one_resource",
+			Path: "/resources/:id",
+			Dest: "one_resource",
 		},
 		urlrouter.Route{
-			PathExp: "/resources",
-			Dest:    "all_resources",
+			Path: "/resources",
+			Dest: "all_resources",
 		},
 	})
 
@@ -30,7 +30,7 @@ func main() {
 	}
 
 	input := "http://example.org/resources/123"
-	route, params, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input, "GET")
 	if err != nil {
 		panic(err)
 	}
