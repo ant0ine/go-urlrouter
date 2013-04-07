@@ -43,7 +43,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ant0ine/go-urlrouter/trie"
+	"net/http"
 	"net/url"
+	"strings"
 )
 
 // TODO
@@ -66,6 +68,10 @@ type Router struct {
 	// list of Routes, the order matters, if multiple Routes match, the first defined will be used.
 	Routes                 []Route
 	disableTrieCompression bool
+	// By default, support for the method OPTIONS is added to all the routes
+	// and add a 405 Method Not Allowed response if the method is not existing
+	// for the path.  By setting this option to false, the routes are not added.
+	disableDefaultOptions  bool
 	index                  map[*Route]int
 	trie                   *trie.Trie
 	routesIndex            map[string]bool
@@ -120,6 +126,10 @@ func (self *Router) Start() error {
 		}
 	}
 
+	if self.disableDefaultOptions == false {
+		self.AddNotAllowed()
+	}
+
 	if self.disableTrieCompression == false {
 		self.trie.Compress()
 	}
@@ -128,6 +138,69 @@ func (self *Router) Start() error {
 	// TODO url encoding
 
 	return nil
+}
+
+func (self *Router) addAllowedRoutes(path string, allowed []string) {
+	optionsFunc := func(w http.ResponseWriter, req *http.Request, params map[string]string) {
+		w.Header().Set("Allow", strings.Join(allowed, ", "))
+		w.WriteHeader(204)
+		r := []byte{}
+		w.Write(r)
+	}
+	route := Route{
+		Path:       path,
+		HttpMethod: "OPTIONS",
+		Dest:       optionsFunc,
+	}
+	self.trie.AddRoute(route.Path, route.HttpMethod, &route)
+
+}
+
+func (self *Router) addDisallowedRoutes(path string, allowed []string, unallowed []string) {
+	unallowedFunc := func(w http.ResponseWriter, req *http.Request, params map[string]string) {
+		w.Header().Set("Allow", strings.Join(allowed, ", "))
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(405)
+		r := []byte{}
+		w.Write(r)
+	}
+	for _, m := range unallowed {
+		route := Route{
+			Path:       path,
+			HttpMethod: m,
+			Dest:       unallowedFunc,
+		}
+		self.trie.AddRoute(route.Path, route.HttpMethod, &route)
+	}
+}
+
+func (self *Router) addOptions(path string, methods map[string]bool) {
+	allowed := []string{}
+	unallowed := []string{}
+
+	for _, dm := range trie.HttpDefaultMethods {
+		if methods[dm] == false {
+			unallowed = append(unallowed, dm)
+		} else {
+			allowed = append(allowed, dm)
+		}
+	}
+	self.addAllowedRoutes(path, allowed)
+	self.addDisallowedRoutes(path, allowed, unallowed)
+}
+
+func (self *Router) AddNotAllowed() {
+	for path, methods := range self.trie.AllRoutes() {
+		// I would like to also add HEAD here, but this means a few changes:
+		// - functions should not write the response, but returns the status, headers and body
+		// - the main handler write the response
+		// - the HEAD function will call the function associated with GET and drop the body,
+		//   and write only the HEADERS + status (as per the RFC).
+		// Since this is a bigger change, I'm not going to apply that patch for now.
+		if methods["OPTIONS"] == false {
+			self.addOptions(path, methods)
+		}
+	}
 }
 
 // Return the first matching Route and the corresponding parameters for a given URL object.
