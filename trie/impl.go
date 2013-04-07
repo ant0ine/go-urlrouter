@@ -235,16 +235,32 @@ func New() *Trie {
 	}
 }
 
+var routes = map[string]map[string]bool{}
+
+func updateRoutes(path string, method string) {
+	if routes[path] == nil {
+		routes[path] = map[string]bool{method: true}
+	} else {
+		routes[path][method] = true
+	}
+}
+
 // Insert the route in the Trie following or creating the nodes corresponding to the path.
 func (self *Trie) AddRoute(path string, method string, route interface{}) error {
 	if method != "" {
-		return self.root.addRoute(path, method, route)
+		err := self.root.addRoute(path, method, route)
+		if err == nil {
+			updateRoutes(path, method)
+		}
+		return err
 	}
 
 	for _, defaultMethod := range HttpDefaultMethods {
 		err := self.root.addRoute(path, defaultMethod, route)
 		if err != nil {
 			return err
+		} else {
+			updateRoutes(path, method)
 		}
 	}
 	return nil
@@ -258,4 +274,8 @@ func (self *Trie) FindRoutes(path string, method string) []*Match {
 // Reduce the size of the tree, must be done after the last AddRoute.
 func (self *Trie) Compress() {
 	self.root.compress()
+}
+
+func (self *Trie) AllRoutes() map[string]map[string]bool {
+	return routes
 }
