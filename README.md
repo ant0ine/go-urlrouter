@@ -5,6 +5,8 @@ Go-UrlRouter
 
 [![Build Status](https://travis-ci.org/ant0ine/go-urlrouter.png?branch=master)](https://travis-ci.org/ant0ine/go-urlrouter)
 
+*Note: This package has been merged into [Go-Json-Rest](https://github.com/ant0ine/go-json-rest), where it has been improved and specialized for the REST API use case.*
+
 This Package implements a URL Router, but instead of using the usual "evaluate all the routes and return the first regexp that matches"
 strategy, it uses a Trie data structure to perform the routing. This is more efficient, and scales better for a large number of routes. It supports the :param and \*splat placeholders in the route strings.
 
