@@ -63,4 +63,4 @@ Copyright (c) 2013-2014 Antoine Imbert
 
 [MIT License](https://github.com/ant0ine/go-urlrouter/blob/master/LICENSE)
 
-
+[![Analytics](https://ga-beacon.appspot.com/UA-309210-4/go-urlrouter/readme)](https://github.com/igrigorik/ga-beacon)
