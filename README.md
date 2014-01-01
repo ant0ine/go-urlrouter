@@ -59,7 +59,7 @@ Documentation
 - [(Blog Post) Playing with Go1.1beta2, it's much faster!] (http://blog.ant0ine.com/typepad/2013/04/go1-1-beta2-much-faster-.html)
 
 
-Copyright (c) 2013 Antoine Imbert
+Copyright (c) 2013-2014 Antoine Imbert
 
 [MIT License](https://github.com/ant0ine/go-urlrouter/blob/master/LICENSE)
 
