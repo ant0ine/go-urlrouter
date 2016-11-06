@@ -55,8 +55,8 @@ Documentation
 -------------
 
 - [Online Documentation (godoc.org)](http://godoc.org/github.com/ant0ine/go-urlrouter)
-- [(Blog Post) Better URL Routing ?] (http://blog.ant0ine.com/typepad/2013/02/better-url-routing-golang-1.html)
-- [(Blog Post) Playing with Go1.1beta2, it's much faster!] (http://blog.ant0ine.com/typepad/2013/04/go1-1-beta2-much-faster-.html)
+- [(Blog Post) Better URL Routing ?] (https://www.ant0ine.com/post/better-url-routing-golang.html)
+- [(Blog Post) Playing with Go1.1beta2, it's much faster!] (https://www.ant0ine.com/post/go1-1-beta2-much-faster.html)
 
 
 Copyright (c) 2013-2014 Antoine Imbert
