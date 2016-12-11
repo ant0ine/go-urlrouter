@@ -5,38 +5,41 @@ import (
 	"testing"
 )
 
+var HttpMethods = [4]string{"GET", "PUT", "POST", "DELETE"}
+
 func TestFindRouteAPI(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{
-			Route{
-				PathExp: "/",
-				Dest:    "root",
-			},
-		},
-	}
+	router := NewRouter()
 
-	err := router.Start()
+	err := router.AddRoute(Route{
+		Path: "/",
+		Dest: "root",
+	})
+
 	if err != nil {
 		t.Fatal()
 	}
+
+	router.Start()
 
 	// full url string
 	input := "http://example.org/"
-	route, params, err := router.FindRoute(input)
-	if err != nil {
-		t.Fatal()
-	}
-	if route.Dest != "root" {
-		t.Error()
-	}
-	if len(params) != 0 {
-		t.Error()
+	for _, method := range HttpMethods {
+		route, params, err := router.FindRoute(input, method)
+		if err != nil {
+			t.Fatal()
+		}
+		if route.Dest != "root" {
+			t.Error()
+		}
+		if len(params) != 0 {
+			t.Error()
+		}
 	}
 
 	// part of the url string
 	input = "/"
-	route, params, err = router.FindRoute(input)
+	route, params, err := router.FindRoute(input, "GET")
 	if err != nil {
 		t.Fatal()
 	}
@@ -52,7 +55,7 @@ func TestFindRouteAPI(t *testing.T) {
 	if err != nil {
 		t.Fatal()
 	}
-	route, params = router.FindRouteFromURL(urlObj)
+	route, params = router.FindRouteFromURL(urlObj, "GET")
 	if route.Dest != "root" {
 		t.Error()
 	}
@@ -63,17 +66,14 @@ func TestFindRouteAPI(t *testing.T) {
 
 func TestNoRoute(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{},
-	}
-
+	router := NewRouter()
 	err := router.Start()
 	if err != nil {
 		t.Fatal()
 	}
 
 	input := "http://example.org/notfound"
-	route, params, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input, "GET")
 	if err != nil {
 		t.Fatal()
 	}
@@ -88,20 +88,19 @@ func TestNoRoute(t *testing.T) {
 
 func TestDuplicatedRoute(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{
-			Route{
-				PathExp: "/",
-				Dest:    "root",
-			},
-			Route{
-				PathExp: "/",
-				Dest:    "the_same",
-			},
-		},
-	}
+	router := NewRouter()
 
-	err := router.Start()
+	err := router.AddRoutes([]Route{
+		Route{
+			Path: "/",
+			Dest: "root",
+		},
+		Route{
+			Path: "/",
+			Dest: "the_same",
+		},
+	})
+
 	if err == nil {
 		t.Error("expected the duplicated route error")
 	}
@@ -109,26 +108,29 @@ func TestDuplicatedRoute(t *testing.T) {
 
 func TestRouteOrder(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{
-			Route{
-				PathExp: "/r/:id",
-				Dest:    "first",
-			},
-			Route{
-				PathExp: "/r/*rest",
-				Dest:    "second",
-			},
+	router := NewRouter()
+	err := router.AddRoutes([]Route{
+		Route{
+			Path: "/r/:id",
+			Dest: "first",
 		},
+		Route{
+			Path: "/r/*rest",
+			Dest: "second",
+		},
+	})
+
+	if err != nil {
+		t.Fatal()
 	}
 
-	err := router.Start()
+	err = router.Start()
 	if err != nil {
 		t.Fatal()
 	}
 
 	input := "http://example.org/r/123"
-	route, params, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input, "GET")
 	if err != nil {
 		t.Fatal()
 	}
@@ -143,26 +145,29 @@ func TestRouteOrder(t *testing.T) {
 
 func TestSimpleExample(t *testing.T) {
 
-	router := Router{
-		Routes: []Route{
-			Route{
-				PathExp: "/resources/:id",
-				Dest:    "one_resource",
-			},
-			Route{
-				PathExp: "/resources",
-				Dest:    "all_resources",
-			},
+	router := NewRouter()
+	err := router.AddRoutes([]Route{
+		Route{
+			Path: "/resources/:id",
+			Dest: "one_resource",
 		},
+		Route{
+			Path: "/resources",
+			Dest: "all_resources",
+		},
+	})
+
+	if err != nil {
+		t.Fatal()
 	}
 
-	err := router.Start()
+	err = router.Start()
 	if err != nil {
 		t.Fatal()
 	}
 
 	input := "http://example.org/resources/123"
-	route, params, err := router.FindRoute(input)
+	route, params, err := router.FindRoute(input, "GET")
 	if err != nil {
 		t.Fatal()
 	}
