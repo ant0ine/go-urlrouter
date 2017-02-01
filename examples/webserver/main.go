@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+type ParamHandler func(http.ResponseWriter, *http.Request, map[string]string)
+
 func Hello(w http.ResponseWriter, req *http.Request, params map[string]string) {
 	fmt.Fprintf(w, "Hello %s", params["name"])
 }
@@ -34,7 +36,7 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		route, params := router.FindRouteFromURL(r.URL)
-		handler := route.Dest.(func(http.ResponseWriter, *http.Request, map[string]string))
+		handler := route.Dest.(ParamHandler)
 		handler(w, r, params)
 	})
 
